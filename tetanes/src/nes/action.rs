@@ -185,7 +185,7 @@ impl std::fmt::Display for Action {
 
 impl AsRef<str> for Action {
     fn as_ref(&self) -> &str {
-        let localization = LOCALIZATION.lock().unwrap();
+        let localization = LOCALIZATION.read().unwrap();
         let text = match self {
             Action::Ui(ui) => match ui {
                 Ui::Quit => localization.get_text("/ui/quit"),

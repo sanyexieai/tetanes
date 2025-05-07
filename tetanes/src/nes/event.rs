@@ -527,7 +527,7 @@ impl ApplicationHandler<NesEvent> for Running {
                     ConfigEvent::HideOverscan(hide) => renderer.hide_overscan = *hide,
                     ConfigEvent::Language(lang) => {
                         info!("Received language change event: {:?}", lang);
-                        LOCALIZATION.lock().unwrap().set_language(*lang);
+                        LOCALIZATION.write().unwrap().set_language(*lang);
                         info!("Language changed to: {:?}", lang);
                     },
                     ConfigEvent::MapperRevisions(revs) => deck.mapper_revisions = *revs,
