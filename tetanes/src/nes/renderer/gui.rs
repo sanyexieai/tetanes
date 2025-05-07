@@ -693,49 +693,51 @@ impl Gui {
             .show(ctx, |ui| {
                 ui.add_enabled_ui(enabled, |ui| {
                     ui.label(format!(
-                        "An update is available for TetaNES! (v{})",
+                        "{} (v{})",
+                        LOCALIZATION.lock().unwrap().get_text("/menu/update/update_available"),
                         self.version.latest(),
                     ));
                     ui.hyperlink("https://github.com/lukexor/tetanes/releases");
 
                     ui.add_space(15.0);
 
-                    // TODO: Add auto-update for each platform
                     if self.enable_auto_update {
-                        ui.label("Would you like to install it and restart?");
+                        ui.label(LOCALIZATION.lock().unwrap().get_text("/menu/update/update"));
                         ui.add_space(15.0);
 
-                        ui.checkbox(&mut self.dont_show_updates, "Don't show this again");
+                        ui.checkbox(&mut self.dont_show_updates, LOCALIZATION.lock().unwrap().get_text("/menu/update/dont_show"));
                         ui.add_space(15.0);
 
                         ui.with_layout(Layout::right_to_left(Align::Min), |ui| {
-                            let res = ui.button("Skip").on_hover_text(format!(
-                                "Keep the current version of TetaNES (v{}).",
+                            let res = ui.button(LOCALIZATION.lock().unwrap().get_text("/menu/update/close")).on_hover_text(format!(
+                                "{} (v{}).",
+                                LOCALIZATION.lock().unwrap().get_text("/menu/update/update_not_available"),
                                 self.version.current()
                             ));
                             if res.clicked() {
                                 close_window = true;
                             }
 
-                            let res = ui.button("Continue").on_hover_text(format!(
-                                "Install the latest version (v{}) restart TetaNES.",
+                            let res = ui.button(LOCALIZATION.lock().unwrap().get_text("/menu/update/download")).on_hover_text(format!(
+                                "{} (v{}).",
+                                LOCALIZATION.lock().unwrap().get_text("/menu/update/update"),
                                 self.version.current()
                             ));
                             if res.clicked() {
                                 if let Err(err) = self.version.install_update_and_restart() {
                                     self.add_message(
                                         MessageType::Error,
-                                        format!("Failed to install update: {err}"),
+                                        format!("{}: {}", LOCALIZATION.lock().unwrap().get_text("/menu/update/update_error"), err),
                                     );
                                     close_window = true;
                                 }
                             }
                         });
                     } else {
-                        ui.label("Click the above link to download the update for your system.");
+                        ui.label(LOCALIZATION.lock().unwrap().get_text("/menu/update/update_not_available"));
                         ui.add_space(15.0);
 
-                        ui.checkbox(&mut self.dont_show_updates, "Don't show this again");
+                        ui.checkbox(&mut self.dont_show_updates, LOCALIZATION.lock().unwrap().get_text("/menu/update/dont_show"));
                         ui.add_space(15.0);
 
                         ui.with_layout(Layout::right_to_left(Align::Min), |ui| {

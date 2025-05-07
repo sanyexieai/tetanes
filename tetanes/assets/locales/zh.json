@@ -22,14 +22,23 @@
         "file": "文件",
         "controls": "控制",
         "config": "配置",
-        "window": "窗口",
-        "debug": "调试",
-        "help": "帮助",
-        "ui_settings": "🔧 界面设置",
-        "ui_inspection": "🔍 界面检查",
-        "ui_memory": "📝 界面内存",
-        "debug_build": "调试版本",
-        "debug_build_tooltip": "TetaNES 以调试模式编译。",
+        "window": {
+            "viewport_info": "视口信息",
+            "performance": "性能",
+            "update": "更新",
+            "dark_mode": "深色模式",
+            "vsync": "垂直同步",
+            "vsync_tooltip": "启用/禁用垂直同步",
+            "frame_time": "帧时间",
+            "frame_count": "帧计数",
+            "cpu": "CPU",
+            "memory": "内存",
+            "disk_read": "磁盘读取",
+            "disk_written": "磁盘写入",
+            "run_time": "运行时间",
+            "cursor_pos": "光标位置",
+            "zapper_pos": "光枪位置"
+        },
         "update": {
             "update": "更新",
             "update_available": "有可用更新",
@@ -59,14 +68,6 @@
             "stop_audio_recording": "停止录制音频",
             "record_audio": "录制音频",
             "record_audio_tooltip": "开始/停止录制音频"
-        },
-        "window": {
-            "viewport_info": "视口信息",
-            "performance": "性能",
-            "update": "更新",
-            "dark_mode": "深色模式",
-            "vsync": "垂直同步",
-            "vsync_tooltip": "启用/禁用垂直同步"
         },
         "config": {
             "controls": "控制设置",
