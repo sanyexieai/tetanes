@@ -770,22 +770,21 @@ impl Gui {
                     Self::toggle_dark_mode_button(&self.tx, ui);
                     ui.separator();
 
-                    ui.menu_button("📁 File", |ui| self.file_menu(ui, cfg));
-                    ui.menu_button("🔨 Controls", |ui| self.controls_menu(ui, cfg));
-                    ui.menu_button("🔧 Config", |ui| self.config_menu(ui, cfg));
-                    // icon: screen
-                    ui.menu_button("🖵 Window", |ui| self.window_menu(ui, cfg));
-                    ui.menu_button("🕷 Debug", |ui| self.debug_menu(ui, cfg));
-                    ui.menu_button("❓ Help", |ui| self.help_menu(ui));
+                    ui.menu_button(format!("📁 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file")), |ui| self.file_menu(ui, cfg));
+                    ui.menu_button(format!("🔨 {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls")), |ui| self.controls_menu(ui, cfg));
+                    ui.menu_button(format!("🔧 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config")), |ui| self.config_menu(ui, cfg));
+                    ui.menu_button(format!("🖵 {}", LOCALIZATION.lock().unwrap().get_text("/menu/window")), |ui| self.window_menu(ui, cfg));
+                    ui.menu_button(format!("🕷 {}", LOCALIZATION.lock().unwrap().get_text("/menu/debug")), |ui| self.debug_menu(ui, cfg));
+                    ui.menu_button(format!("❓ {}", LOCALIZATION.lock().unwrap().get_text("/menu/help")), |ui| self.help_menu(ui));
 
                     if cfg!(debug_assertions) {
                         ui.separator();
                         ui.label(
-                            RichText::new("⚠ Debug build ⚠")
+                            RichText::new(format!("⚠ {} ⚠", LOCALIZATION.lock().unwrap().get_text("/menu/debug_build")))
                                 .small()
                                 .color(ui.visuals().warn_fg_color),
                         )
-                        .on_hover_text("TetaNES was compiled with debug assertions enabled.");
+                        .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/debug_build_tooltip"));
                     }
                 });
             });
@@ -802,14 +801,14 @@ impl Gui {
     pub fn toggle_dark_mode_button(tx: &NesEventProxy, ui: &mut Ui) {
         if ui.ctx().style().visuals.dark_mode {
             let button = Button::new("☀").frame(false);
-            let res = ui.add(button).on_hover_text("Switch to light mode");
+            let res = ui.add(button).on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/window/switch_to_light"));
             if res.clicked() {
                 ui.ctx().set_visuals(Self::light_theme());
                 tx.event(ConfigEvent::DarkTheme(false));
             }
         } else {
             let button = Button::new("🌙").frame(false);
-            let res = ui.add(button).on_hover_text("Switch to dark mode");
+            let res = ui.add(button).on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/window/switch_to_dark"));
             if res.clicked() {
                 ui.ctx().set_visuals(Self::dark_theme());
                 tx.event(ConfigEvent::DarkTheme(true));
@@ -1135,10 +1134,10 @@ impl Gui {
 
         ui.separator();
 
-        ui.menu_button("🕒 Emulation Speed...", |ui| {
+        ui.menu_button(format!("🕒 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config/emulation")), |ui| {
             let speed = cfg.emulation.speed;
-            let button =
-                Button::new("Increment").shortcut_text(cfg.shortcut(Setting::IncrementSpeed));
+            let button = Button::new(LOCALIZATION.lock().unwrap().get_text("/setting/increment_speed"))
+                .shortcut_text(cfg.shortcut(Setting::IncrementSpeed));
             if ui.add(button).clicked() {
                 let new_speed = cfg.next_increment_speed();
                 if speed != new_speed {
@@ -1146,8 +1145,8 @@ impl Gui {
                 }
             }
 
-            let button =
-                Button::new("Decrement").shortcut_text(cfg.shortcut(Setting::DecrementSpeed));
+            let button = Button::new(LOCALIZATION.lock().unwrap().get_text("/setting/decrement_speed"))
+                .shortcut_text(cfg.shortcut(Setting::DecrementSpeed));
             if ui.add(button).clicked() {
                 let new_speed = cfg.next_decrement_speed();
                 if speed != new_speed {
@@ -1162,16 +1161,16 @@ impl Gui {
 
         ui.separator();
 
-        ui.menu_button("🌉 Video Filter...", |ui| {
+        ui.menu_button(format!("🌉 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config/video")), |ui| {
             Preferences::video_filter_radio(tx, ui, cfg.deck.filter, cfg, ShowShortcut::Yes);
         });
-        ui.menu_button("🕶 Shader...", |ui| {
+        ui.menu_button(format!("🕶 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config/shader")), |ui| {
             Preferences::shader_radio(tx, ui, cfg.renderer.shader, cfg, ShowShortcut::Yes);
         });
-        ui.menu_button("🌎 Nes Region...", |ui| {
+        ui.menu_button(format!("🌎 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config/region")), |ui| {
             Preferences::nes_region_radio(tx, ui, cfg.deck.region);
         });
-        ui.menu_button("🌐 Language...", |ui| {
+        ui.menu_button(format!("🌐 {}", LOCALIZATION.lock().unwrap().get_text("/menu/language")), |ui| {
             let mut current_lang = LOCALIZATION.lock().unwrap().current_language();
             if ui.radio_value(&mut current_lang, Language::English, "English").clicked() {
                 self.tx.event(ConfigEvent::Language(Language::English));
@@ -1182,10 +1181,10 @@ impl Gui {
                 ui.close_menu();
             }
         });
-        ui.menu_button("🎮 Four Player...", |ui| {
+        ui.menu_button(format!("🎮 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config/input")), |ui| {
             Preferences::four_player_radio(tx, ui, cfg.deck.four_player);
         });
-        ui.menu_button("📓 Game Genie Codes...", |ui| {
+        ui.menu_button(format!("📓 {}", LOCALIZATION.lock().unwrap().get_text("/menu/config/genie_codes")), |ui| {
             self.preferences.show_genie_codes_entry(ui, cfg);
 
             ui.separator();
@@ -1196,8 +1195,7 @@ impl Gui {
         ui.separator();
 
         let mut preferences_open = self.preferences.open();
-        // icon: gear
-        let toggle = ToggleValue::new(&mut preferences_open, "🔧 Preferences")
+        let toggle = ToggleValue::new(&mut preferences_open, format!("🔧 {}", LOCALIZATION.lock().unwrap().get_text("/menu/preferences")))
             .shortcut_text(cfg.shortcut(Menu::Preferences));
         if ui.add(toggle).clicked() {
             self.preferences.set_open(preferences_open, &self.ctx);
@@ -1205,8 +1203,7 @@ impl Gui {
         }
 
         let mut keybinds_open = self.keybinds.open();
-        // icon: keyboard
-        let toggle = ToggleValue::new(&mut keybinds_open, "🖮 Keybinds")
+        let toggle = ToggleValue::new(&mut keybinds_open, format!("🖮 {}", LOCALIZATION.lock().unwrap().get_text("/menu/keybinds")))
             .shortcut_text(cfg.shortcut(Menu::Keybinds));
         if ui.add(toggle).clicked() {
             self.keybinds.set_open(keybinds_open, &self.ctx);
@@ -1230,8 +1227,9 @@ impl Gui {
             ..
         } = cfg.renderer;
 
-        ui.menu_button("📏 Window Scale...", |ui| {
-            let button = Button::new("Increment").shortcut_text(cfg.shortcut(IncrementScale));
+        ui.menu_button(format!("📏 {}", LOCALIZATION.lock().unwrap().get_text("/menu/window/scale")), |ui| {
+            let button = Button::new(LOCALIZATION.lock().unwrap().get_text("/setting/increment_scale"))
+                .shortcut_text(cfg.shortcut(IncrementScale));
             if ui.add(button).clicked() {
                 let new_scale = cfg.next_increment_scale();
                 if scale != new_scale {
@@ -1239,7 +1237,8 @@ impl Gui {
                 }
             }
 
-            let button = Button::new("Decrement").shortcut_text(cfg.shortcut(DecrementScale));
+            let button = Button::new(LOCALIZATION.lock().unwrap().get_text("/setting/decrement_scale"))
+                .shortcut_text(cfg.shortcut(DecrementScale));
             if ui.add(button).clicked() {
                 let new_scale = cfg.next_decrement_scale();
                 if scale != new_scale {
@@ -1275,17 +1274,17 @@ impl Gui {
         #[cfg(feature = "profiling")]
         {
             let mut profile = puffin::are_scopes_on();
-            ui.toggle_value(&mut profile, "Profiler")
-                .on_hover_text("Toggle the Puffin profiling window");
+            ui.toggle_value(&mut profile, LOCALIZATION.lock().unwrap().get_text("/menu/debug/profiler"))
+                .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/debug/profiler_tooltip"));
             puffin::set_scopes_on(profile);
         }
 
         let mut perf_stats_open = self.perf_stats_open;
-        let toggle = ToggleValue::new(&mut perf_stats_open, "🛠 Performance Stats")
+        let toggle = ToggleValue::new(&mut perf_stats_open, format!("🛠 {}", LOCALIZATION.lock().unwrap().get_text("/menu/perf_stats")))
             .shortcut_text(cfg.shortcut(Menu::PerfStats));
         let res = ui
             .add(toggle)
-            .on_hover_text("Enable a performance statistics overlay");
+            .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/debug/perf_stats_tooltip"));
         if res.clicked() {
             self.perf_stats_open = perf_stats_open;
             tx.event(EmulationEvent::ShowFrameStats(self.perf_stats_open));
@@ -1293,8 +1292,8 @@ impl Gui {
         }
 
         let mut gui_settings_open = self.gui_settings_open.load(Ordering::Acquire);
-        let toggle = ToggleValue::new(&mut gui_settings_open, "🔧 UI Settings");
-        let res = ui.add(toggle).on_hover_text("Toggle the UI style window");
+        let toggle = ToggleValue::new(&mut gui_settings_open, format!("🔧 {}", LOCALIZATION.lock().unwrap().get_text("/menu/ui_settings")));
+        let res = ui.add(toggle).on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/debug/ui_settings_tooltip"));
         if res.clicked() {
             self.gui_settings_open
                 .store(gui_settings_open, Ordering::Release);
@@ -1304,10 +1303,10 @@ impl Gui {
         #[cfg(debug_assertions)]
         {
             let mut gui_inspection_open = self.gui_inspection_open.load(Ordering::Acquire);
-            let toggle = ToggleValue::new(&mut gui_inspection_open, "🔍 UI Inspection");
+            let toggle = ToggleValue::new(&mut gui_inspection_open, format!("🔍 {}", LOCALIZATION.lock().unwrap().get_text("/menu/ui_inspection")));
             let res = ui
                 .add(toggle)
-                .on_hover_text("Toggle the UI inspection window");
+                .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/debug_build_tooltip"));
             if res.clicked() {
                 self.gui_inspection_open
                     .store(gui_inspection_open, Ordering::Release);
@@ -1315,8 +1314,8 @@ impl Gui {
             }
 
             let mut gui_memory_open = self.gui_memory_open.load(Ordering::Acquire);
-            let toggle = ToggleValue::new(&mut gui_memory_open, "📝 UI Memory");
-            let res = ui.add(toggle).on_hover_text("Toggle the UI memory window");
+            let toggle = ToggleValue::new(&mut gui_memory_open, format!("📝 {}", LOCALIZATION.lock().unwrap().get_text("/menu/ui_memory")));
+            let res = ui.add(toggle).on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/debug/ui_memory_tooltip"));
             if res.clicked() {
                 self.gui_memory_open
                     .store(gui_memory_open, Ordering::Release);
@@ -1624,7 +1623,7 @@ impl Gui {
             ui.end_row();
 
             let fps_min = self.frame_stats.fps_min;
-            ui.strong("FPS (min):");
+            ui.strong(format!("{} (min):", LOCALIZATION.lock().unwrap().get_text("/menu/window/fps")));
             if fps_min.is_finite() {
                 ui.colored_label(fps_color(fps_min), format!("{fps_min:.2}"));
             } else {
@@ -1633,7 +1632,7 @@ impl Gui {
             ui.end_row();
 
             let frame_time = self.frame_stats.frame_time;
-            ui.strong("Frame Time:");
+            ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/frame_time")));
             if frame_time.is_finite() {
                 ui.colored_label(frame_time_color(frame_time), format!("{frame_time:.2} ms"));
             } else {
@@ -1642,7 +1641,7 @@ impl Gui {
             ui.end_row();
 
             let frame_time_max = self.frame_stats.frame_time_max;
-            ui.strong("Frame Time (max):");
+            ui.strong(format!("{} (max):", LOCALIZATION.lock().unwrap().get_text("/menu/window/frame_time")));
             if frame_time_max.is_finite() {
                 ui.colored_label(
                     frame_time_color(frame_time_max),
@@ -1653,7 +1652,7 @@ impl Gui {
             }
             ui.end_row();
 
-            ui.strong("Frame Count:");
+            ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/frame_count")));
             ui.label(format!("{}", self.frame_stats.frame_count));
             ui.end_row();
 
@@ -1670,19 +1669,19 @@ impl Gui {
                 ui.label("");
                 ui.end_row();
 
-                ui.strong("CPU:");
+                ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/cpu")));
                 ui.colored_label(
                     cpu_color(stats.cpu_usage),
                     format!("{:.2}%", stats.cpu_usage),
                 );
                 ui.end_row();
 
-                ui.strong("Memory:");
+                ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/memory")));
                 ui.label(format!("{} MB", bytes_to_mb(stats.memory)));
                 ui.end_row();
 
                 let du = stats.disk_usage;
-                ui.strong("Disk read new/total:");
+                ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/disk_read")));
                 ui.label(format!(
                     "{:.2}/{:.2} MB",
                     bytes_to_mb(du.read_bytes),
@@ -1690,7 +1689,7 @@ impl Gui {
                 ));
                 ui.end_row();
 
-                ui.strong("Disk written new/total:");
+                ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/disk_written")));
                 ui.label(format!(
                     "{:.2}/{:.2} MB",
                     bytes_to_mb(du.written_bytes),
@@ -1702,7 +1701,7 @@ impl Gui {
             ui.label("");
             ui.end_row();
 
-            ui.strong("Run Time:");
+            ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/run_time")));
             ui.label(format!("{} s", self.start.elapsed().as_secs()));
             ui.end_row();
 
@@ -1717,12 +1716,12 @@ impl Gui {
                 None => ("(-, -)".to_string(), "(-, -)".to_string()),
             };
 
-            ui.strong("Cursor Pos:");
+            ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/cursor_pos")));
             ui.label(cursor_pos);
             ui.end_row();
 
             if cfg.deck.zapper {
-                ui.strong("Zapper Pos:");
+                ui.strong(format!("{}:", LOCALIZATION.lock().unwrap().get_text("/menu/window/zapper_pos")));
                 ui.label(zapper_pos);
                 ui.end_row();
             }
@@ -1733,12 +1732,12 @@ impl Gui {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
 
-        if self.version.requires_updates() && ui.button("🌐 Check for Updates...").clicked() {
+        if self.version.requires_updates() && ui.button(format!("🌐 {}", LOCALIZATION.lock().unwrap().get_text("/menu/update/check"))).clicked() {
             let notify_latest = true;
             self.version.check_for_updates(&self.tx, notify_latest);
             ui.close_menu();
         }
-        ui.toggle_value(&mut self.about_open, "ℹ About");
+        ui.toggle_value(&mut self.about_open, format!("ℹ {}", LOCALIZATION.lock().unwrap().get_text("/menu/about")));
     }
 
     fn about(&mut self, ui: &mut Ui, enabled: bool) {
