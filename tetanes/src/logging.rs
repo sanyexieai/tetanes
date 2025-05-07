@@ -11,7 +11,7 @@ fn create_registry() -> Layered<Targets, Registry> {
     let default_log = if cfg!(debug_assertions) {
         "warn,tetanes=debug,tetanes-core=debug"
     } else {
-        "warn,tetanes=info,tetanes-core=info"
+        "warn,tetanes=warn,tetanes-core=warn"
     };
     let default_filter = default_log.parse::<Targets>().unwrap_or_default();
 

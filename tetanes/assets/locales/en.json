@@ -38,6 +38,7 @@
         "window_text": "Window",
         "debug_text": "Debug",
         "help_text": "Help",
+        "about_text": "About",
         "file": {
             "load_rom": "Load ROM...",
             "unload_rom": "Unload ROM...",

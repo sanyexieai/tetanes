@@ -38,6 +38,7 @@
         "window_text": "窗口",
         "debug_text": "调试",
         "help_text": "帮助",
+        "about_text": "关于",
         "file": {
             "load_rom": "加载ROM...",
             "unload_rom": "卸载ROM...",
