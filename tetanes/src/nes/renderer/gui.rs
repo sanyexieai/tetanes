@@ -819,56 +819,49 @@ impl Gui {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
 
-        let button = Button::new("📂 Load ROM...").shortcut_text(cfg.shortcut(UiAction::LoadRom));
+        let button = Button::new(format!("📂 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/load_rom")))
+            .shortcut_text(cfg.shortcut(UiAction::LoadRom));
         if ui.add(button).clicked() {
             if self.loaded_rom.is_some() {
                 self.run_state = RunState::AutoPaused;
                 self.tx.event(EmulationEvent::RunState(self.run_state));
             }
-            // NOTE: Due to some platforms file dialogs blocking the event loop,
-            // loading requires a round-trip in order for the above pause to
-            // get processed.
             self.tx.event(UiEvent::LoadRomDialog);
             ui.close_menu();
         }
 
-        ui.menu_button("🍺 Homebrew ROM...", |ui| self.homebrew_rom_menu(ui));
+        ui.menu_button(format!("🍺 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/homebrew_rom")), |ui| self.homebrew_rom_menu(ui));
 
         let tx = &self.tx;
 
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
-            let button =
-                Button::new("⏹ Unload ROM...").shortcut_text(cfg.shortcut(UiAction::UnloadRom));
+            let button = Button::new(format!("⏹ {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/unload_rom")))
+                .shortcut_text(cfg.shortcut(UiAction::UnloadRom));
             let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::UnloadRom);
                 ui.close_menu();
             }
 
-            let button =
-                Button::new("🎞 Load Replay").shortcut_text(cfg.shortcut(UiAction::LoadReplay));
+            let button = Button::new(format!("🎞 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/load_replay")))
+                .shortcut_text(cfg.shortcut(UiAction::LoadReplay));
             let res = ui
                 .add(button)
-                .on_hover_text("Load a replay file for the currently loaded ROM.")
+                .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/file/load_replay_tooltip"))
                 .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 self.run_state = RunState::AutoPaused;
                 tx.event(EmulationEvent::RunState(self.run_state));
-                // NOTE: Due to some platforms file dialogs blocking the event loop,
-                // loading requires a round-trip in order for the above pause to
-                // get processed.
                 tx.event(UiEvent::LoadReplayDialog);
                 ui.close_menu();
             }
         });
 
         if feature!(Filesystem) {
-            ui.menu_button("🗄 Recently Played...", |ui| {
-                // Sizing pass here since the width of the submenu can change as recent ROMS are
-                // added or cleared.
+            ui.menu_button(format!("🗄 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/recent_roms")), |ui| {
                 ui.scope_builder(UiBuilder::new().sizing_pass(), |ui| {
                     if cfg.renderer.recent_roms.is_empty() {
-                        ui.label("No recent ROMs");
+                        ui.label(LOCALIZATION.lock().unwrap().get_text("/menu/file/no_recent_roms"));
                     } else {
                         for rom in &cfg.renderer.recent_roms {
                             ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
@@ -885,7 +878,7 @@ impl Gui {
                                             None => {
                                                 tx.event(UiEvent::Message((
                                                     MessageType::Error,
-                                                    "Failed to load rom".into(),
+                                                    LOCALIZATION.lock().unwrap().get_text("/menu/file/load_rom_error").into(),
                                                 )));
                                             }
                                         }
@@ -901,34 +894,33 @@ impl Gui {
                 });
             });
 
-                        ui.separator();
+            ui.separator();
         }
 
         if feature!(Storage) {
             ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
-                let button =
-                    Button::new("💾 Save State").shortcut_text(cfg.shortcut(DeckAction::SaveState));
+                let button = Button::new(format!("💾 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/save_state")))
+                    .shortcut_text(cfg.shortcut(DeckAction::SaveState));
                 let res = ui
                     .add(button)
-                    .on_hover_text("Save the current state to the selected save slot.")
+                    .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/file/save_state_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::SaveState(cfg.emulation.save_slot));
                 };
 
-                let button =
-                    Button::new("⎗ Load State").shortcut_text(cfg.shortcut(DeckAction::LoadState));
+                let button = Button::new(format!("⎗ {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/load_state")))
+                    .shortcut_text(cfg.shortcut(DeckAction::LoadState));
                 let res = ui
                     .add(button)
-                    .on_hover_text("Load a previous state from the selected save slot.")
+                    .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/file/load_state_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::LoadState(cfg.emulation.save_slot));
                 }
             });
 
-            // icon: # in a square
-            ui.menu_button("󾠬 Save Slot...", |ui| {
+            ui.menu_button(format!("󾠬 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/save_slot")), |ui| {
                 Preferences::save_slot_radio(
                     tx,
                     ui,
@@ -942,14 +934,15 @@ impl Gui {
         if feature!(OsViewports) {
             ui.separator();
 
-            let button = Button::new("⎆ Quit").shortcut_text(cfg.shortcut(UiAction::Quit));
+            let button = Button::new(format!("⎆ {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/quit")))
+                .shortcut_text(cfg.shortcut(UiAction::Quit));
             if ui.add(button).clicked() {
                 tx.event(UiEvent::Terminate);
                 ui.close_menu();
             };
         }
     }
-
+    
     fn homebrew_rom_menu(&mut self, ui: &mut Ui) {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
