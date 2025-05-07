@@ -31,7 +31,7 @@ use tetanes_core::{
     time::{Duration, Instant},
     video::VideoFilter,
 };
-use tracing::{debug, error, trace, warn};
+use tracing::{debug, error, trace, warn, info};
 use uuid::Uuid;
 use winit::{
     application::ApplicationHandler,
@@ -526,7 +526,9 @@ impl ApplicationHandler<NesEvent> for Running {
                     }
                     ConfigEvent::HideOverscan(hide) => renderer.hide_overscan = *hide,
                     ConfigEvent::Language(lang) => {
-                        LOCALIZATION.lock().unwrap().set_language(Language::from(*lang));
+                        info!("Received language change event: {:?}", lang);
+                        LOCALIZATION.lock().unwrap().set_language(*lang);
+                        info!("Language changed to: {:?}", lang);
                     },
                     ConfigEvent::MapperRevisions(revs) => deck.mapper_revisions = *revs,
                     ConfigEvent::RamState(ram_state) => deck.ram_state = *ram_state,

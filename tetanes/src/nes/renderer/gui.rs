@@ -52,10 +52,7 @@ use tetanes_core::{
 use tracing::{error, info, warn};
 use winit::event::WindowEvent;
 use std::collections::HashMap;
-use std::fs;
 use serde_json;
-use std::cell::RefCell;
-use std::path::Path;
 
 mod keybinds;
 pub mod lib;
@@ -99,61 +96,107 @@ impl Default for Language {
 pub struct Localization {
     translations: HashMap<Language, Value>,
     current_language: Language,
-    cache: RefCell<String>,
 }
 
 impl Localization {
     pub fn new() -> Self {
         let mut translations = HashMap::new();
-        let locales_dir = Path::new("tetanes/src/nes/locales");
         
-        if let Ok(content) = fs::read_to_string(locales_dir.join("en.json")) {
-            if let Ok(json) = serde_json::from_str(&content) {
+        // 测试文件路径
+        info!("Current directory: {:?}", std::env::current_dir());
+        
+        // 加载英文翻译
+        const EN_TRANSLATIONS: &[u8] = include_bytes!("../../../assets/locales/en.json");
+        info!("Attempting to load English translations...");
+        match serde_json::from_slice(EN_TRANSLATIONS) {
+            Ok(json) => {
                 translations.insert(Language::English, json);
+                info!("Successfully loaded English translations");
             }
+            Err(e) => error!("Failed to parse English translations: {}", e),
         }
         
-        if let Ok(content) = fs::read_to_string(locales_dir.join("zh.json")) {
-            if let Ok(json) = serde_json::from_str(&content) {
+        // 加载中文翻译
+        const ZH_TRANSLATIONS: &[u8] = include_bytes!("../../../assets/locales/zh.json");
+        info!("Attempting to load Chinese translations...");
+        match serde_json::from_slice(ZH_TRANSLATIONS) {
+            Ok(json) => {
                 translations.insert(Language::Chinese, json);
+                info!("Successfully loaded Chinese translations");
             }
+            Err(e) => error!("Failed to parse Chinese translations: {}", e),
         }
+        
+        info!("Current translations map: {:?}", translations.keys().collect::<Vec<_>>());
         
         Self {
             translations,
             current_language: Language::default(),
-            cache: RefCell::new(String::new()),
         }
     }
 
     pub fn current_language(&self) -> Language {
+        info!("Current language: {:?}", self.current_language);
         self.current_language
     }
 
     pub fn set_language(&mut self, language: Language) {
+        info!("Setting language to: {:?}", language);
         self.current_language = language;
     }
 
-    pub fn get_text(&self, path: &str) -> &str {
-        let mut cache = self.cache.borrow_mut();
-        if let Some(translation) = self.translations.get(&self.current_language) {
-            if let Some(value) = translation.pointer(path) {
-                if let Some(text) = value.as_str() {
-                    *cache = text.to_string();
-                    return Box::leak(cache.clone().into_boxed_str());
+    pub fn get_text(&self, path: &str) -> String {
+        let path = path.trim_start_matches('/');
+        let parts: Vec<&str> = path.split('/').collect();
+        
+        info!("Getting text for path: {}, current language: {:?}", path, self.current_language);
+        
+        let translation = match self.translations.get(&self.current_language) {
+            Some(t) => t,
+            None => {
+                warn!("No translation found for language: {:?}", self.current_language);
+                return path.to_string();
+            }
+        };
+        
+        let mut current = translation;
+        for part in parts {
+            match current.get(part) {
+                Some(next) => current = next,
+                None => {
+                    warn!("No translation found for path: {}", path);
+                    return path.to_string();
                 }
             }
         }
-        if let Some(translation) = self.translations.get(&Language::English) {
-            if let Some(value) = translation.pointer(path) {
-                if let Some(text) = value.as_str() {
-                    *cache = text.to_string();
-                    return Box::leak(cache.clone().into_boxed_str());
-                }
-            }
+        
+        let result = current.as_str().map(String::from).unwrap_or_else(|| {
+            warn!("Invalid translation value for path: {}", path);
+            path.to_string()
+        });
+        
+        info!("Translation result for path {}: {}", path, result);
+        result
+    }
+
+    pub fn test_translations(&self) {
+        info!("Testing translations...");
+        info!("Current language: {:?}", self.current_language);
+        
+        // 测试一些基本路径
+        let test_paths = [
+            "/ui/quit",
+            "/menu/about",
+            "/deck/joypad_start",
+        ];
+        
+        for path in test_paths {
+            let text = self.get_text(path);
+            info!("Path: {}, Translation: {}", path, text);
         }
-        *cache = path.to_string();
-        Box::leak(cache.clone().into_boxed_str())
+        
+        // 打印所有可用的翻译
+        info!("Available translations: {:?}", self.translations.keys().collect::<Vec<_>>());
     }
 }
 
@@ -338,11 +381,14 @@ impl Gui {
                     Menu::Preferences => self.preferences.toggle_open(&self.ctx),
                     Menu::Language => {
                         let current_lang = LOCALIZATION.lock().unwrap().current_language();
+                        info!("Current language before switch: {:?}", current_lang);
                         let new_lang = match current_lang {
                             Language::English => Language::Chinese,
                             Language::Chinese => Language::English,
                         };
+                        info!("Switching to language: {:?}", new_lang);
                         LOCALIZATION.lock().unwrap().set_language(new_lang);
+                        self.tx.event(ConfigEvent::Language(new_lang));
                     }
                 },
                 _ => (),
@@ -845,7 +891,7 @@ impl Gui {
                 });
             });
 
-            ui.separator();
+                        ui.separator();
         }
 
         if feature!(Storage) {
@@ -1442,7 +1488,7 @@ impl Gui {
                     ui.with_layout(
                         Layout::top_down_justified(Align::LEFT).with_main_wrap(true),
                         |ui| {
-                            ui.label(
+                        ui.label(
                                 RichText::new(format!(
                                     "Recording {}...",
                                     recording_labels.join(" & ")
@@ -1917,5 +1963,32 @@ impl Gui {
             },
             ..Self::dark_theme()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_translations() {
+        let mut localization = Localization::new();
+        
+        // 测试英文翻译
+        localization.set_language(Language::English);
+        assert_eq!(localization.get_text("/ui/quit"), "Quit");
+        assert_eq!(localization.get_text("/menu/about"), "About");
+        println!("English translation: {}", localization.get_text("/ui/quit"));
+        println!("English translation: {}", localization.get_text("/menu/about"));
+        
+        // 测试中文翻译
+        localization.set_language(Language::Chinese);
+        assert_eq!(localization.get_text("/ui/quit"), "退出");
+        assert_eq!(localization.get_text("/menu/about"), "关于");
+        println!("Chinese translation: {}", localization.get_text("/ui/quit"));
+        println!("Chinese translation: {}", localization.get_text("/menu/about"));
+        
+        // 测试不存在的路径
+        assert_eq!(localization.get_text("/nonexistent/path"), "/nonexistent/path");
     }
 }

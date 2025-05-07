@@ -311,8 +311,8 @@ impl AsRef<str> for Action {
                 },
             },
             Action::Language(language) => match language {
-                Language::English => "English",
-                Language::Chinese => "中文",
+                Language::English => "English".to_string(),
+                Language::Chinese => "中文".to_string(),
             },
         };
         Box::leak(text.to_string().into_boxed_str())
