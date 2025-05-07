@@ -13,7 +13,13 @@
         "viewport_info": "ℹ 视口信息 ({})"
     },
     "menu": {
-        "about": "关于",
+        "about": {
+            "version": "版本",
+            "preferences": "偏好设置",
+            "data": "存档/RAM、回放",
+            "screenshots": "截图",
+            "audio": "音频录制"
+        },
         "keybinds": "按键绑定",
         "perf_stats": "性能统计",
         "ppu_viewer": "PPU查看器",
@@ -93,7 +99,27 @@
             "zapper_pos": "光枪位置",
             "scale": "窗口缩放...",
             "fps": "FPS"
-        }
+        },
+        "debug": {
+            "profiler": "性能分析器",
+            "profiler_tooltip": "切换Puffin性能分析窗口",
+            "perf_stats_tooltip": "启用性能统计叠加层",
+            "ui_settings_tooltip": "切换UI样式窗口",
+            "ui_memory_tooltip": "切换UI内存窗口",
+            "debugger": "调试器",
+            "debugger_tooltip": "切换调试器",
+            "not_implemented": "尚未实现",
+            "ppu_viewer_tooltip": "切换PPU查看器",
+            "apu_mixer": "APU混音器",
+            "apu_mixer_tooltip": "切换APU混音器",
+            "step_into_tooltip": "单步执行一条CPU指令",
+            "step_out_tooltip": "从当前CPU函数中步出",
+            "step_over_tooltip": "跳过下一条CPU指令",
+            "step_scanline_tooltip": "执行一整条PPU扫描线",
+            "step_frame_tooltip": "执行一整帧PPU",
+            "test_panic": "测试崩溃"
+        },
+        "help": "帮助"
     },
     "feature": {
         "toggle_replay_recording": "切换回放录制",
@@ -180,5 +206,51 @@
         "step_over": "调试步过",
         "step_scanline": "调试扫描线",
         "step_frame": "调试帧"
+    },
+    "error": {
+        "io": {
+            "create_dir": "创建目录失败 {directory}",
+            "create_file": "创建文件失败 {path}",
+            "open_file": "打开文件失败 {path}",
+            "remove_dir": "删除目录失败 {path}"
+        },
+        "wasm": {
+            "window": "获取JS窗口失败",
+            "storage": "获取存储失败",
+            "no_storage": "无可用存储",
+            "serialize": "序列化数据失败",
+            "store": "写入数据失败",
+            "find_data": "找不到数据 {key}",
+            "deserialize": "反序列化数据失败"
+        }
+    },
+    "video": {
+        "filter": {
+            "pixellate": "像素化",
+            "ntsc": "NTSC"
+        }
+    },
+    "system": {
+        "not_supported": "尚未支持",
+        "todo": "功能开发中",
+        "region": {
+            "ntsc": "NTSC",
+            "pal": "PAL",
+            "auto": "自动检测"
+        }
+    },
+    "debug": {
+        "ppu": {
+            "vblank_start": "开始垂直消隐 - PPU:{0},{1}",
+            "vblank_nmi": "垂直消隐NMI - PPU:{0},{1}",
+            "vblank_stop": "停止垂直消隐,Sprite0命中,溢出 - PPU:{0},{1}",
+            "odd_frame": "跳过奇数帧周期: {0} - PPU:{1},{2}",
+            "nmi_enabled": "$2000 NMI已启用: {0} - PPU:{1},{2}",
+            "nmi_during_vbl": "$2000 垂直消隐期间NMI - PPU:{0},{1}",
+            "nmi_ack": "$2002 NMI确认 - PPU:{0},{1}",
+            "prevent_vbl": "$2002 阻止垂直消隐 - PPU:{0},{1}",
+            "read": "PPU $2007读取: {0:02X} - PPU:{1},{2}",
+            "write": "PPU $2007写入: ${0:04X} -> {1:02X} - PPU:{2},{3}"
+        }
     }
 }

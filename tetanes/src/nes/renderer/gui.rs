@@ -1817,9 +1817,9 @@ impl Gui {
         for (ty, message, _) in self.messages.iter().take(Self::MAX_MESSAGES) {
             let visuals = &ui.style().visuals;
             let (icon, color) = match ty {
-                MessageType::Info => ("ℹ", visuals.widgets.noninteractive.fg_stroke.color),
-                MessageType::Warn => ("⚠", visuals.warn_fg_color),
-                MessageType::Error => ("❗", visuals.error_fg_color),
+                MessageType::Info => (LOCALIZATION.lock().unwrap().get_text("/menu/message/info_icon"), visuals.widgets.noninteractive.fg_stroke.color),
+                MessageType::Warn => (LOCALIZATION.lock().unwrap().get_text("/menu/message/warn_icon"), visuals.warn_fg_color),
+                MessageType::Error => (LOCALIZATION.lock().unwrap().get_text("/menu/message/error_icon"), visuals.error_fg_color),
             };
             ui.colored_label(color, format!("{icon} {message}"));
         }
@@ -1832,7 +1832,7 @@ impl Gui {
             ui.horizontal(|ui| {
                 let res = ui.colored_label(Color32::RED, error);
                 ui.add_space(available_width - res.rect.width() - 30.0);
-                if ui.button("❌").clicked() {
+                if ui.button(LOCALIZATION.lock().unwrap().get_text("/menu/message/error_icon")).clicked() {
                     self.error = None;
                 }
             });
