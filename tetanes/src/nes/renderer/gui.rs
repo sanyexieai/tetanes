@@ -243,7 +243,11 @@ pub struct Gui {
 impl Gui {
     const MSG_TIMEOUT: Duration = Duration::from_secs(3);
     const MAX_MESSAGES: usize = 5;
-    const NO_ROM_LOADED: &'static str = "No ROM is loaded.";
+
+    fn no_rom_loaded() -> String {
+        let localization = LOCALIZATION.lock().unwrap();
+        localization.get_text("/ui/no_rom_loaded")
+    }
 
     /// Create a `Gui` instance.
     pub fn new(
@@ -829,7 +833,7 @@ impl Gui {
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
             let button =
                 Button::new("⏹ Unload ROM...").shortcut_text(cfg.shortcut(UiAction::UnloadRom));
-            let res = ui.add(button).on_disabled_hover_text(Self::NO_ROM_LOADED);
+            let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::UnloadRom);
                 ui.close_menu();
@@ -840,7 +844,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Load a replay file for the currently loaded ROM.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 self.run_state = RunState::AutoPaused;
                 tx.event(EmulationEvent::RunState(self.run_state));
@@ -901,7 +905,7 @@ impl Gui {
                 let res = ui
                     .add(button)
                     .on_hover_text("Save the current state to the selected save slot.")
-                    .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                    .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::SaveState(cfg.emulation.save_slot));
                 };
@@ -911,7 +915,7 @@ impl Gui {
                 let res = ui
                     .add(button)
                     .on_hover_text("Load a previous state from the selected save slot.")
-                    .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                    .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::LoadState(cfg.emulation.save_slot));
                 }
@@ -978,7 +982,7 @@ impl Gui {
                 "⏸ Pause"
             })
             .shortcut_text(cfg.shortcut(UiAction::TogglePause));
-            let res = ui.add(button).on_disabled_hover_text(Self::NO_ROM_LOADED);
+            let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 self.run_state = match self.run_state {
                     RunState::Running => RunState::ManuallyPaused,
@@ -1006,9 +1010,9 @@ impl Gui {
                 let button = Button::new("⟲ Instant Rewind")
                     .shortcut_text(cfg.shortcut(Feature::InstantRewind));
                 let disabled_hover_text = if self.loaded_rom.is_none() {
-                    Self::NO_ROM_LOADED
+                    Self::no_rom_loaded()
                 } else {
-                    "Rewind can be enabled under the `Config` menu."
+                    "Rewind can be enabled under the `Config` menu.".to_string()
                 };
                 let res = ui
                     .add(button)
@@ -1025,7 +1029,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Emulate a soft reset of the NES.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::Reset(ResetKind::Soft));
                 ui.close_menu();
@@ -1036,7 +1040,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Emulate a power cycle of the NES.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::Reset(ResetKind::Hard));
                 ui.close_menu();
@@ -1049,7 +1053,7 @@ impl Gui {
             ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
                 let button = Button::new("🖼 Screenshot")
                     .shortcut_text(cfg.shortcut(Feature::TakeScreenshot));
-                let res = ui.add(button).on_disabled_hover_text(Self::NO_ROM_LOADED);
+                let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::Screenshot);
                     ui.close_menu();
@@ -1065,7 +1069,7 @@ impl Gui {
                 let res = ui
                     .add(button)
                     .on_hover_text("Record or stop recording a game replay file.")
-                    .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                    .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::ReplayRecord(!self.replay_recording));
                     ui.close_menu();
@@ -1081,7 +1085,7 @@ impl Gui {
                 let res = ui
                     .add(button)
                     .on_hover_text("Record or stop recording a audio file.")
-                    .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                    .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::AudioRecord(!self.audio_recording));
                     ui.close_menu();
@@ -1368,7 +1372,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Step a single CPU instruction.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::DebugStep(DebugStep::Into));
             }
@@ -1378,7 +1382,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Step out of the current CPU function.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::DebugStep(DebugStep::Out));
             }
@@ -1388,7 +1392,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Step over the next CPU instruction.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::DebugStep(DebugStep::Over));
             }
@@ -1398,7 +1402,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Step an entire PPU scanline.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::DebugStep(DebugStep::Scanline));
             }
@@ -1408,7 +1412,7 @@ impl Gui {
             let res = ui
                 .add(button)
                 .on_hover_text("Step an entire PPU Frame.")
-                .on_disabled_hover_text(Self::NO_ROM_LOADED);
+                .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::DebugStep(DebugStep::Frame));
             }

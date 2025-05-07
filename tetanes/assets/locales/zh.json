@@ -4,7 +4,8 @@
         "toggle_pause": "暂停/继续",
         "load_rom": "加载ROM",
         "unload_rom": "卸载ROM",
-        "load_replay": "加载回放"
+        "load_replay": "加载回放",
+        "no_rom_loaded": "未加载ROM"
     },
     "menu": {
         "about": "关于",
@@ -20,7 +21,75 @@
         "debug": "调试",
         "help": "帮助",
         "debug_build": "调试版本",
-        "debug_build_tooltip": "TetaNES 以调试模式编译。"
+        "debug_build_tooltip": "TetaNES 以调试模式编译。",
+        "update": {
+            "update": "更新",
+            "update_available": "有可用更新",
+            "update_not_available": "已是最新版本",
+            "update_error": "检查更新出错",
+            "update_checking": "正在检查更新",
+            "dont_show": "不再显示",
+            "download": "下载",
+            "close": "关闭"
+        },
+        "controls": {
+            "resume": "继续",
+            "pause": "暂停",
+            "mute": "静音",
+            "unmute": "取消静音", 
+            "instant_rewind": "即时回退",
+            "rewind_disabled_tooltip": "回退功能已禁用",
+            "instant_rewind_tooltip": "即时回退到上一状态",
+            "reset": "重置",
+            "reset_tooltip": "软重置模拟器",
+            "power_cycle": "重启",
+            "power_cycle_tooltip": "硬重置模拟器",
+            "screenshot": "截图",
+            "stop_replay_recording": "停止录制回放",
+            "record_replay": "录制回放",
+            "record_replay_tooltip": "开始/停止录制回放",
+            "stop_audio_recording": "停止录制音频",
+            "record_audio": "录制音频",
+            "record_audio_tooltip": "开始/停止录制音频"
+        },
+        "window": {
+            "viewport_info": "视口信息",
+            "performance": "性能",
+            "update": "更新",
+            "dark_mode": "深色模式",
+            "vsync": "垂直同步",
+            "vsync_tooltip": "启用/禁用垂直同步"
+        },
+        "config": {
+            "controls": "控制设置",
+            "controls_tooltip": "配置控制选项",
+            "audio": "音频设置",
+            "audio_tooltip": "配置音频选项",
+            "video": "视频设置",
+            "video_tooltip": "配置视频选项",
+            "emulation": "模拟设置",
+            "emulation_tooltip": "配置模拟选项",
+            "input": "输入设置",
+            "input_tooltip": "配置输入选项",
+            "save": "保存配置",
+            "save_tooltip": "保存当前配置",
+            "load": "加载配置",
+            "load_tooltip": "加载已保存的配置",
+            "reset": "重置配置",
+            "reset_tooltip": "重置为默认配置"
+        },
+        "message": {
+            "info_icon": "ℹ",
+            "warn_icon": "⚠",
+            "error_icon": "❌"
+        },
+        "homebrew": {
+            "homebrew_roms": "自制ROM",
+            "homebrew_roms_tooltip": "查看自制ROM信息",
+            "authors": "作者",
+            "description": "描述",
+            "source": "源代码"
+        }
     },
     "feature": {
         "toggle_replay_recording": "切换回放录制",

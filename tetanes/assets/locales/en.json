@@ -4,7 +4,8 @@
         "toggle_pause": "Toggle Pause",
         "load_rom": "Load ROM",
         "unload_rom": "Unload ROM",
-        "load_replay": "Load Replay"
+        "load_replay": "Load Replay",
+        "no_rom_loaded": "No ROM is loaded"
     },
     "menu": {
         "about": "About",
@@ -20,7 +21,75 @@
         "debug": "🕷 Debug",
         "help": "❓ Help",
         "debug_build": "⚠ Debug build ⚠",
-        "debug_build_tooltip": "TetaNES was compiled with debug assertions enabled."
+        "debug_build_tooltip": "TetaNES was compiled with debug assertions enabled.",
+        "update": {
+            "update": "Update",
+            "update_available": "Update Available",
+            "update_not_available": "No Updates Available",
+            "update_error": "Update Check Error",
+            "update_checking": "Checking for Updates",
+            "dont_show": "Don't Show Again",
+            "download": "Download",
+            "close": "Close"
+        },
+        "controls": {
+            "resume": "Resume",
+            "pause": "Pause",
+            "mute": "Mute",
+            "unmute": "Unmute",
+            "instant_rewind": "Instant Rewind",
+            "rewind_disabled_tooltip": "Rewinding is disabled",
+            "instant_rewind_tooltip": "Instantly rewind to previous state",
+            "reset": "Reset",
+            "reset_tooltip": "Soft reset the emulator",
+            "power_cycle": "Power Cycle",
+            "power_cycle_tooltip": "Hard reset the emulator",
+            "screenshot": "Screenshot",
+            "stop_replay_recording": "Stop Recording Replay",
+            "record_replay": "Record Replay",
+            "record_replay_tooltip": "Start/Stop recording replay",
+            "stop_audio_recording": "Stop Recording Audio",
+            "record_audio": "Record Audio",
+            "record_audio_tooltip": "Start/Stop recording audio"
+        },
+        "window": {
+            "viewport_info": "Viewport Info",
+            "performance": "Performance",
+            "update": "Update",
+            "dark_mode": "Dark Mode",
+            "vsync": "VSync",
+            "vsync_tooltip": "Enable/Disable vertical synchronization"
+        },
+        "config": {
+            "controls": "Controls Settings",
+            "controls_tooltip": "Configure control options",
+            "audio": "Audio Settings",
+            "audio_tooltip": "Configure audio options",
+            "video": "Video Settings",
+            "video_tooltip": "Configure video options",
+            "emulation": "Emulation Settings",
+            "emulation_tooltip": "Configure emulation options",
+            "input": "Input Settings",
+            "input_tooltip": "Configure input options",
+            "save": "Save Config",
+            "save_tooltip": "Save current configuration",
+            "load": "Load Config",
+            "load_tooltip": "Load saved configuration",
+            "reset": "Reset Config",
+            "reset_tooltip": "Reset to default configuration"
+        },
+        "message": {
+            "info_icon": "ℹ",
+            "warn_icon": "⚠",
+            "error_icon": "❌"
+        },
+        "homebrew": {
+            "homebrew_roms": "Homebrew ROMs",
+            "homebrew_roms_tooltip": "View homebrew ROM information",
+            "authors": "Authors",
+            "description": "Description",
+            "source": "Source"
+        }
     },
     "feature": {
         "toggle_replay_recording": "Toggle Replay Recording",
