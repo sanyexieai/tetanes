@@ -79,7 +79,50 @@
             "shader": "着色器...",
             "region": "区域...",
             "input": "输入...",
-            "genie_codes": "金手指代码..."
+            "genie_codes": "金手指代码...",
+            "cycle_accurate": "周期精确",
+            "cycle_accurate_tooltip": "启用/禁用周期精确模拟",
+            "zapper": "光枪",
+            "zapper_tooltip": "启用/禁用光枪支持",
+            "rewind": "回退",
+            "rewind_tooltip": "启用/禁用状态回退",
+            "overscan": "过扫描",
+            "overscan_tooltip": "隐藏/显示过扫描区域",
+            "run_ahead": "运行提前...",
+            "run_ahead_tooltip": "设置运行提前帧数",
+            "four_player": "四玩家...",
+            "four_player_tooltip": "配置四玩家控制器",
+            "genie_codes_entry": "输入金手指代码...",
+            "genie_codes_list": "已启用的金手指代码",
+            "speed": {
+                "increment": "增加速度",
+                "decrement": "减少速度",
+                "current": "当前速度: {0}x",
+                "tooltip": "调整模拟速度"
+            },
+            "video_filter": {
+                "pixellate": "像素化",
+                "ntsc": "NTSC",
+                "tooltip": "选择视频滤镜"
+            },
+            "shader_type": {
+                "default": "默认",
+                "crt_easymode": "CRT简易模式",
+                "tooltip": "选择着色器类型"
+            },
+            "region_type": {
+                "auto": "自动",
+                "ntsc": "NTSC",
+                "pal": "PAL",
+                "dendy": "Dendy",
+                "tooltip": "选择区域类型"
+            },
+            "input_type": {
+                "standard": "标准",
+                "fourscore": "四分插座",
+                "satellite": "卫星",
+                "tooltip": "选择输入设备类型"
+            }
         },
         "message": {
             "info_icon": "ℹ",
@@ -234,7 +277,19 @@
         "step_out": "调试步出",
         "step_over": "调试步过",
         "step_scanline": "调试扫描线",
-        "step_frame": "调试帧"
+        "step_frame": "调试帧",
+        "ppu": {
+            "vblank_start": "开始垂直消隐 - PPU:{0},{1}",
+            "vblank_nmi": "垂直消隐NMI - PPU:{0},{1}",
+            "vblank_stop": "停止垂直消隐,Sprite0命中,溢出 - PPU:{0},{1}",
+            "odd_frame": "跳过奇数帧周期: {0} - PPU:{1},{2}",
+            "nmi_enabled": "$2000 NMI已启用: {0} - PPU:{1},{2}",
+            "nmi_during_vbl": "$2000 垂直消隐期间NMI - PPU:{0},{1}",
+            "nmi_ack": "$2002 NMI确认 - PPU:{0},{1}",
+            "prevent_vbl": "$2002 阻止垂直消隐 - PPU:{0},{1}",
+            "read": "PPU $2007读取: {0:02X} - PPU:{1},{2}",
+            "write": "PPU $2007写入: ${0:04X} -> {1:02X} - PPU:{2},{3}"
+        }
     },
     "error": {
         "io": {
@@ -266,20 +321,6 @@
             "ntsc": "NTSC",
             "pal": "PAL",
             "auto": "自动检测"
-        }
-    },
-    "debug": {
-        "ppu": {
-            "vblank_start": "开始垂直消隐 - PPU:{0},{1}",
-            "vblank_nmi": "垂直消隐NMI - PPU:{0},{1}",
-            "vblank_stop": "停止垂直消隐,Sprite0命中,溢出 - PPU:{0},{1}",
-            "odd_frame": "跳过奇数帧周期: {0} - PPU:{1},{2}",
-            "nmi_enabled": "$2000 NMI已启用: {0} - PPU:{1},{2}",
-            "nmi_during_vbl": "$2000 垂直消隐期间NMI - PPU:{0},{1}",
-            "nmi_ack": "$2002 NMI确认 - PPU:{0},{1}",
-            "prevent_vbl": "$2002 阻止垂直消隐 - PPU:{0},{1}",
-            "read": "PPU $2007读取: {0:02X} - PPU:{1},{2}",
-            "write": "PPU $2007写入: ${0:04X} -> {1:02X} - PPU:{2},{3}"
         }
     }
 }

@@ -971,14 +971,14 @@ impl Gui {
     fn controls_menu(&mut self, ui: &mut Ui, cfg: &Config) {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
-
+    
         let tx = &self.tx;
-
+    
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
             let button = Button::new(if self.run_state.paused() {
-                "▶ Resume"
+                format!("▶ {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/resume"))
             } else {
-                "⏸ Pause"
+                format!("⏸ {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/pause"))
             })
             .shortcut_text(cfg.shortcut(UiAction::TogglePause));
             let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
@@ -991,99 +991,99 @@ impl Gui {
                 ui.close_menu();
             };
         });
-
+    
         let button = Button::new(if cfg.audio.enabled {
-            "🔇 Mute"
+            format!("🔇 {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/mute"))
         } else {
-            "🔊 Unmute"
+            format!("🔊 {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/unmute"))
         })
         .shortcut_text(cfg.shortcut(Setting::ToggleAudio));
         if ui.add(button).clicked() {
             tx.event(ConfigEvent::AudioEnabled(!cfg.audio.enabled));
         };
-
+    
         ui.separator();
-
+    
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
             ui.add_enabled_ui(cfg.emulation.rewind, |ui| {
-                let button = Button::new("⟲ Instant Rewind")
+                let button = Button::new(format!("⟲ {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/instant_rewind")))
                     .shortcut_text(cfg.shortcut(Feature::InstantRewind));
                 let disabled_hover_text = if self.loaded_rom.is_none() {
                     Self::no_rom_loaded()
                 } else {
-                    "Rewind can be enabled under the `Config` menu.".to_string()
+                    LOCALIZATION.lock().unwrap().get_text("/menu/controls/rewind_disabled")
                 };
                 let res = ui
                     .add(button)
-                    .on_hover_text("Instantly rewind state to a previous point.")
+                    .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/controls/instant_rewind_tooltip"))
                     .on_disabled_hover_text(disabled_hover_text);
                 if res.clicked() {
                     tx.event(EmulationEvent::InstantRewind);
                     ui.close_menu();
                 };
             });
-
-            let button = Button::new("🔃 Reset")
+    
+            let button = Button::new(format!("🔃 {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/reset")))
                 .shortcut_text(cfg.shortcut(DeckAction::Reset(ResetKind::Soft)));
             let res = ui
                 .add(button)
-                .on_hover_text("Emulate a soft reset of the NES.")
+                .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/controls/reset_tooltip"))
                 .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::Reset(ResetKind::Soft));
                 ui.close_menu();
             };
-
-            let button = Button::new("🔌 Power Cycle")
+    
+            let button = Button::new(format!("🔌 {}", LOCALIZATION.lock().unwrap().get_text("/menu/controls/power_cycle")))
                 .shortcut_text(cfg.shortcut(DeckAction::Reset(ResetKind::Hard)));
             let res = ui
                 .add(button)
-                .on_hover_text("Emulate a power cycle of the NES.")
+                .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/controls/power_cycle_tooltip"))
                 .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::Reset(ResetKind::Hard));
                 ui.close_menu();
             };
         });
-
+    
         if feature!(Filesystem) {
             ui.separator();
-
+    
             ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
-                let button = Button::new("🖼 Screenshot")
+                let button = Button::new(format!("🖼 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/screenshot")))
                     .shortcut_text(cfg.shortcut(Feature::TakeScreenshot));
                 let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::Screenshot);
                     ui.close_menu();
                 };
-
+    
                 let button_txt = if self.replay_recording {
-                    "⏹ Stop Replay Recording"
+                    format!("⏹ {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/stop_replay"))
                 } else {
-                    "🎞 Record Replay"
+                    format!("🎞 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/record_replay"))
                 };
                 let button = Button::new(button_txt)
                     .shortcut_text(cfg.shortcut(Feature::ToggleReplayRecording));
                 let res = ui
                     .add(button)
-                    .on_hover_text("Record or stop recording a game replay file.")
+                    .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/file/replay_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::ReplayRecord(!self.replay_recording));
                     ui.close_menu();
                 };
-
+    
                 let button_txt = if self.audio_recording {
-                    "⏹ Stop Audio Recording"
+                    format!("⏹ {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/stop_audio"))
                 } else {
-                    "🎤 Record Audio"
+                    format!("🎤 {}", LOCALIZATION.lock().unwrap().get_text("/menu/file/record_audio"))
                 };
                 let button = Button::new(button_txt)
                     .shortcut_text(cfg.shortcut(Feature::ToggleAudioRecording));
                 let res = ui
                     .add(button)
-                    .on_hover_text("Record or stop recording a audio file.")
+                    .on_hover_text(LOCALIZATION.lock().unwrap().get_text("/menu/file/audio_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::AudioRecord(!self.audio_recording));
@@ -1092,7 +1092,7 @@ impl Gui {
             });
         }
     }
-
+    
     fn config_menu(&mut self, ui: &mut Ui, cfg: &Config) {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
