@@ -10,7 +10,13 @@
         "about_rom": "ℹ 关于 {}",
         "performance_stats": "🛠 性能统计",
         "update_available": "🌐 更新可用",
-        "viewport_info": "ℹ 视口信息 ({})"
+        "viewport_info": "ℹ 视口信息 ({})",
+        "recording": "正在录制 {}...",
+        "invalid_cpu": "无效的CPU操作码: ${0:02X} {1:?} #{2:?} 遇到。游戏: {3}",
+        "recovery_options": "恢复选项:",
+        "reset": "重置",
+        "power_cycle": "电源循环",
+        "clear_save_states": "清除存档"
     },
     "menu": {
         "about": {
@@ -38,9 +44,29 @@
             "load_state": "加载状态",
             "load_state_tooltip": "从选定的存档槽加载之前的状态",
             "save_slot": "存档槽...",
-            "quit": "退出"
+            "quit": "退出",
+            "homebrew_rom": "自制ROM...",
+            "screenshot": "截图",
+            "record_replay": "录制回放",
+            "stop_replay": "停止录制回放",
+            "record_audio": "录制音频",
+            "stop_audio": "停止录制音频",
+            "replay_tooltip": "录制或停止录制游戏回放文件",
+            "audio_tooltip": "录制或停止录制音频文件"
         },
-        "controls": "控制",
+        "controls": {
+            "resume": "继续",
+            "pause": "暂停",
+            "mute": "静音",
+            "unmute": "取消静音",
+            "instant_rewind": "即时回退",
+            "instant_rewind_tooltip": "立即回退到之前的状态点",
+            "rewind_disabled": "回退功能可在'配置'菜单中启用",
+            "reset": "重置",
+            "reset_tooltip": "模拟NES软重置",
+            "power_cycle": "电源循环",
+            "power_cycle_tooltip": "模拟NES电源循环"
+        },
         "config": {
             "controls": "控制设置",
             "controls_tooltip": "配置控制选项",
@@ -119,7 +145,17 @@
             "step_frame_tooltip": "执行一整帧PPU",
             "test_panic": "测试崩溃"
         },
-        "help": "帮助"
+        "help": "帮助",
+        "update": {
+            "update_available": "更新可用",
+            "update": "更新",
+            "update_not_available": "更新不可用",
+            "update_error": "更新失败",
+            "close": "关闭",
+            "download": "下载",
+            "dont_show": "不再显示更新",
+            "check": "检查更新"
+        }
     },
     "feature": {
         "toggle_replay_recording": "切换回放录制",
