@@ -2,12 +2,12 @@ use crate::{
     feature,
     nes::{
         Nes, RunState, Running, State,
-        action::{Action, Debug, DebugKind, DebugStep, Feature, Setting, Ui, LOCALIZATION},
+        action::{Action, Debug, DebugKind, DebugStep, Feature, Setting, Ui},
         config::{Config, RecentRom},
         emulation::FrameStats,
         input::{ActionBindings, AxisDirection, Gamepads, Input, InputBindings},
         renderer::{
-            gui::{Menu, MessageType, Language, Localization},
+            gui::{Menu, MessageType, Language},
             shader::Shader,
         },
         rom::RomData,
@@ -40,6 +40,8 @@ use winit::{
     keyboard::PhysicalKey,
     window::WindowId,
 };
+
+use super::renderer::gui::LOCALIZATION;
 
 #[derive(Default, Debug, Copy, Clone)]
 #[must_use]

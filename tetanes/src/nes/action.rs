@@ -5,10 +5,6 @@
 
 use crate::nes::renderer::{gui::Menu, shader::Shader};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::collections::HashMap;
-use std::fs;
-use std::path::Path;
 use tetanes_core::{
     action::Action as DeckAction,
     apu::Channel,
@@ -17,12 +13,8 @@ use tetanes_core::{
     mapper::{Bf909Revision, MapperRevision, Mmc3Revision},
     video::VideoFilter,
 };
-use std::cell::RefCell;
-use crate::nes::renderer::gui::{Language, Localization};
 
-lazy_static::lazy_static! {
-    pub static ref LOCALIZATION: std::sync::Mutex<Localization> = std::sync::Mutex::new(Localization::new());
-}
+use super::renderer::gui::{Language, LOCALIZATION};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Action {

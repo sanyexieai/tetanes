@@ -2,7 +2,7 @@ use crate::{
     feature,
     nes::{
         RunState,
-        action::{Debug, DebugKind, DebugStep, Feature, Setting, Ui as UiAction, LOCALIZATION},
+        action::{Debug, DebugKind, DebugStep, Feature, Setting, Ui as UiAction},
         config::{Config, RecentRom, RendererConfig},
         emulation::FrameStats,
         event::{
@@ -62,6 +62,10 @@ pub mod lib;
 mod ppu_viewer;
 mod preferences;
 
+
+lazy_static::lazy_static! {
+    pub static ref LOCALIZATION: std::sync::Mutex<Localization> = std::sync::Mutex::new(Localization::new());
+}
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Menu {
     About,
