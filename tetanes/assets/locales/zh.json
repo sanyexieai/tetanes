@@ -6,7 +6,11 @@
         "unload_rom": "卸载ROM",
         "load_replay": "加载回放",
         "no_rom_loaded": "未加载ROM",
-        "nes_frame": "NES画面"
+        "nes_frame": "NES画面",
+        "about_rom": "ℹ 关于 {}",
+        "performance_stats": "🛠 性能统计",
+        "update_available": "🌐 更新可用",
+        "viewport_info": "ℹ 视口信息 ({})"
     },
     "menu": {
         "about": "关于",
