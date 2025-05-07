@@ -5,7 +5,8 @@
         "load_rom": "加载ROM",
         "unload_rom": "卸载ROM",
         "load_replay": "加载回放",
-        "no_rom_loaded": "未加载ROM"
+        "no_rom_loaded": "未加载ROM",
+        "nes_frame": "NES画面"
     },
     "menu": {
         "about": "关于",

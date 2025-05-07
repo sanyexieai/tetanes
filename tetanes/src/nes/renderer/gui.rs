@@ -260,7 +260,7 @@ impl Gui {
             render_state,
             cfg.texture_size(),
             cfg.deck.region.aspect_ratio(),
-            Some("nes frame"),
+            Some(LOCALIZATION.lock().unwrap().get_text("/ui/nes_frame")),
         );
 
         Self {

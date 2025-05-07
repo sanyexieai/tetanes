@@ -4,7 +4,7 @@ use egui::{TextureId, Vec2, load::SizedTexture};
 #[derive(Debug)]
 #[must_use]
 pub struct Texture {
-    pub label: Option<&'static str>,
+    pub label: Option<String>,
     pub id: TextureId,
     pub texture: wgpu::Texture,
     pub size: Vec2,
@@ -18,13 +18,13 @@ impl Texture {
         render_state: &mut RenderState,
         size: Vec2,
         aspect_ratio: f32,
-        label: Option<&'static str>,
+        label: Option<String>,
     ) -> Self {
         let max_texture_side = render_state.max_texture_side() as f32;
         let texture = render_state
             .device
             .create_texture(&wgpu::TextureDescriptor {
-                label,
+                label: label.as_deref(),
                 size: wgpu::Extent3d {
                     width: size.x.min(max_texture_side) as u32,
                     height: size.y.min(max_texture_side) as u32,
@@ -39,7 +39,7 @@ impl Texture {
             });
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor {
-            label,
+            label: label.as_deref(),
             dimension: Some(wgpu::TextureViewDimension::D2),
             ..Default::default()
         });
@@ -53,7 +53,7 @@ impl Texture {
             mipmap_filter: wgpu::FilterMode::Nearest,
             ..Default::default()
         };
-        let id = render_state.register_texture(label, &view, sampler_descriptor);
+        let id = render_state.register_texture(label.as_deref(), &view, sampler_descriptor);
 
         Self {
             label,
@@ -70,7 +70,7 @@ impl Texture {
     }
 
     pub fn resize(&mut self, render_state: &mut RenderState, size: Vec2, aspect_ratio: f32) {
-        *self = Self::new(render_state, size, aspect_ratio, self.label);
+        *self = Self::new(render_state, size, aspect_ratio, self.label.clone());
     }
 
     pub fn sized(&self) -> SizedTexture {
