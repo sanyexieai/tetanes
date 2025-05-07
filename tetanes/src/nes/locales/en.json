@@ -1,0 +1,119 @@
+{
+    "ui": {
+        "quit": "Quit",
+        "toggle_pause": "Toggle Pause",
+        "load_rom": "Load ROM",
+        "unload_rom": "Unload ROM",
+        "load_replay": "Load Replay"
+    },
+    "menu": {
+        "about": "About",
+        "keybinds": "Keybinds",
+        "perf_stats": "Performance Stats",
+        "ppu_viewer": "PPU Viewer",
+        "preferences": "Preferences",
+        "language": "Language"
+    },
+    "feature": {
+        "toggle_replay_recording": "Toggle Replay Recording",
+        "toggle_audio_recording": "Toggle Audio Recording",
+        "visual_rewind": "Visual Rewind",
+        "instant_rewind": "Instant Rewind",
+        "take_screenshot": "Take Screenshot"
+    },
+    "setting": {
+        "toggle_fullscreen": "Toggle Fullscreen",
+        "toggle_embed_viewports": "Toggle Embed Viewports",
+        "toggle_always_on_top": "Toggle Always On Top",
+        "toggle_audio": "Toggle Audio",
+        "toggle_cycle_accurate": "Toggle Cycle Accurate",
+        "toggle_rewinding": "Toggle Rewinding",
+        "toggle_overscan": "Toggle Overscan",
+        "toggle_menubar": "Toggle Menubar",
+        "toggle_messages": "Toggle Messages",
+        "toggle_screen_reader": "Toggle Screen Reader",
+        "toggle_fps": "Toggle FPS",
+        "fast_forward": "Fast Forward",
+        "increment_scale": "Increment Scale",
+        "decrement_scale": "Decrement Scale",
+        "increment_speed": "Increment Speed",
+        "decrement_speed": "Decrement Speed",
+        "shader": {
+            "default": "Set Default Shader",
+            "crt_easymode": "Set Shader to CRT Easymode"
+        }
+    },
+    "deck": {
+        "reset": {
+            "soft": "Reset",
+            "hard": "Power Cycle"
+        },
+        "joypad": {
+            "left": "Joypad Left",
+            "right": "Joypad Right",
+            "up": "Joypad Up",
+            "down": "Joypad Down",
+            "a": "Joypad A",
+            "b": "Joypad B",
+            "turbo_a": "Joypad Turbo A",
+            "turbo_b": "Joypad Turbo B",
+            "select": "Joypad Select",
+            "start": "Joypad Start"
+        },
+        "zapper": {
+            "toggle": "Zapper Gun Toggle",
+            "aim": "Zapper Aim",
+            "aim_offscreen": "Zapper Aim Offscreen (Hold)",
+            "trigger": "Zapper Trigger"
+        },
+        "four_player": {
+            "disabled": "4-Player Disable",
+            "fourscore": "4-Player Enable (FourScore)",
+            "satellite": "4-Player Enable (Satellite)"
+        },
+        "save_slot": {
+            "set": "Set Save Slot {n}",
+            "save_state": "Save State",
+            "load_state": "Load State"
+        },
+        "apu_channel": {
+            "pulse1": "Toggle Pulse1 Channel",
+            "pulse2": "Toggle Pulse2 Channel",
+            "triangle": "Toggle Triangle Channel",
+            "noise": "Toggle Noise Channel",
+            "dmc": "Toggle DMC Channel",
+            "mapper": "Toggle Mapper Channel"
+        },
+        "mapper": {
+            "mmc3a": "Set Mapper to MMC3A",
+            "mmc3bc": "Set Mapper to MMC3B/C",
+            "mcacc": "Set Mapper to MC-ACC",
+            "bf909x": "Set Mapper to BF909x",
+            "bf9097": "Set Mapper to BF9097"
+        },
+        "region": {
+            "auto": "Set Region to Auto",
+            "ntsc": "Set Region to NTSC",
+            "pal": "Set Region to PAL",
+            "dendy": "Set Region to Dendy"
+        },
+        "filter": {
+            "pixellate": "Set Filter to Pixellate",
+            "ntsc": "Set Filter to NTSC"
+        }
+    },
+    "debug": {
+        "toggle": {
+            "cpu": "Toggle CPU Debugger",
+            "ppu": "Toggle PPU Viewer",
+            "apu": "Toggle APU Mixer"
+        },
+        "step": {
+            "into": "Debug Step Into",
+            "out": "Debug Step Out",
+            "over": "Debug Step Over",
+            "scanline": "Debug Step Scanline",
+            "frame": "Debug Step Frame"
+        }
+    }
+} 

@@ -2,7 +2,7 @@ use crate::{
     feature,
     nes::{
         RunState,
-        action::{Debug, DebugKind, DebugStep, Feature, Setting, Ui as UiAction},
+        action::{Debug, DebugKind, DebugStep, Feature, Setting, Ui as UiAction, LOCALIZATION},
         config::{Config, RecentRom, RendererConfig},
         emulation::FrameStats,
         event::{
@@ -36,6 +36,7 @@ use egui::{
     style::{HandleShape, Selection, TextCursorStyle, WidgetVisuals},
 };
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
@@ -50,6 +51,11 @@ use tetanes_core::{
 };
 use tracing::{error, info, warn};
 use winit::event::WindowEvent;
+use std::collections::HashMap;
+use std::fs;
+use serde_json;
+use std::cell::RefCell;
+use std::path::Path;
 
 mod keybinds;
 pub mod lib;
@@ -63,6 +69,7 @@ pub enum Menu {
     PerfStats,
     PpuViewer,
     Preferences,
+    Language,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -70,6 +77,80 @@ pub enum MessageType {
     Info,
     Warn,
     Error,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Language {
+    English,
+    Chinese,
+}
+
+impl Default for Language {
+    fn default() -> Self {
+        Self::Chinese
+    }
+}
+
+#[derive(Debug)]
+pub struct Localization {
+    translations: HashMap<Language, Value>,
+    current_language: Language,
+    cache: RefCell<String>,
+}
+
+impl Localization {
+    pub fn new() -> Self {
+        let mut translations = HashMap::new();
+        let locales_dir = Path::new("tetanes/src/nes/locales");
+        
+        if let Ok(content) = fs::read_to_string(locales_dir.join("en.json")) {
+            if let Ok(json) = serde_json::from_str(&content) {
+                translations.insert(Language::English, json);
+            }
+        }
+        
+        if let Ok(content) = fs::read_to_string(locales_dir.join("zh.json")) {
+            if let Ok(json) = serde_json::from_str(&content) {
+                translations.insert(Language::Chinese, json);
+            }
+        }
+        
+        Self {
+            translations,
+            current_language: Language::default(),
+            cache: RefCell::new(String::new()),
+        }
+    }
+
+    pub fn current_language(&self) -> Language {
+        self.current_language
+    }
+
+    pub fn set_language(&mut self, language: Language) {
+        self.current_language = language;
+    }
+
+    pub fn get_text(&self, path: &str) -> &str {
+        let mut cache = self.cache.borrow_mut();
+        if let Some(translation) = self.translations.get(&self.current_language) {
+            if let Some(value) = translation.pointer(path) {
+                if let Some(text) = value.as_str() {
+                    *cache = text.to_string();
+                    return Box::leak(cache.clone().into_boxed_str());
+                }
+            }
+        }
+        if let Some(translation) = self.translations.get(&Language::English) {
+            if let Some(value) = translation.pointer(path) {
+                if let Some(text) = value.as_str() {
+                    *cache = text.to_string();
+                    return Box::leak(cache.clone().into_boxed_str());
+                }
+            }
+        }
+        *cache = path.to_string();
+        Box::leak(cache.clone().into_boxed_str())
+    }
 }
 
 #[derive(Debug)]
@@ -251,6 +332,14 @@ impl Gui {
                     }
                     Menu::PpuViewer => self.ppu_viewer.toggle_open(&self.ctx),
                     Menu::Preferences => self.preferences.toggle_open(&self.ctx),
+                    Menu::Language => {
+                        let current_lang = LOCALIZATION.lock().unwrap().current_language();
+                        let new_lang = match current_lang {
+                            Language::English => Language::Chinese,
+                            Language::Chinese => Language::English,
+                        };
+                        LOCALIZATION.lock().unwrap().set_language(new_lang);
+                    }
                 },
                 _ => (),
             },
@@ -1019,6 +1108,17 @@ impl Gui {
         });
         ui.menu_button("🌎 Nes Region...", |ui| {
             Preferences::nes_region_radio(tx, ui, cfg.deck.region);
+        });
+        ui.menu_button("🌐 Language...", |ui| {
+            let mut current_lang = LOCALIZATION.lock().unwrap().current_language();
+            if ui.radio_value(&mut current_lang, Language::English, "English").clicked() {
+                self.tx.event(ConfigEvent::Language(Language::English));
+                ui.close_menu();
+            }
+            if ui.radio_value(&mut current_lang, Language::Chinese, "中文").clicked() {
+                self.tx.event(ConfigEvent::Language(Language::Chinese));
+                ui.close_menu();
+            }
         });
         ui.menu_button("🎮 Four Player...", |ui| {
             Preferences::four_player_radio(tx, ui, cfg.deck.four_player);

@@ -2,12 +2,12 @@ use crate::{
     feature,
     nes::{
         Nes, RunState, Running, State,
-        action::{Action, Debug, DebugKind, DebugStep, Feature, Setting, Ui},
+        action::{Action, Debug, DebugKind, DebugStep, Feature, Setting, Ui, LOCALIZATION},
         config::{Config, RecentRom},
         emulation::FrameStats,
         input::{ActionBindings, AxisDirection, Gamepads, Input, InputBindings},
         renderer::{
-            gui::{Menu, MessageType},
+            gui::{Menu, MessageType, Language, Localization},
             shader::Shader,
         },
         rom::RomData,
@@ -141,6 +141,7 @@ pub enum ConfigEvent {
     GenieCodeClear,
     GenieCodeRemoved(String),
     HideOverscan(bool),
+    Language(Language),
     MapperRevisions(MapperRevisionsConfig),
     RamState(RamState),
     RecentRomsClear,
@@ -522,6 +523,9 @@ impl ApplicationHandler<NesEvent> for Running {
                         deck.genie_codes.retain(|genie| genie.code() != code);
                     }
                     ConfigEvent::HideOverscan(hide) => renderer.hide_overscan = *hide,
+                    ConfigEvent::Language(lang) => {
+                        LOCALIZATION.lock().unwrap().set_language(Language::from(*lang));
+                    },
                     ConfigEvent::MapperRevisions(revs) => deck.mapper_revisions = *revs,
                     ConfigEvent::RamState(ram_state) => deck.ram_state = *ram_state,
                     ConfigEvent::RecentRomsClear => renderer.recent_roms.clear(),

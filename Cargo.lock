@@ -4271,6 +4271,7 @@ dependencies = [
  "gilrs",
  "hound",
  "image",
+ "lazy_static",
  "parking_lot",
  "pollster",
  "profiling",
