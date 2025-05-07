@@ -1421,10 +1421,10 @@ impl Gui {
     fn nes_frame(&mut self, ui: &mut Ui, enabled: bool, cfg: &Config, gamepads: &Gamepads) {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
-
+    
         ui.add_enabled_ui(enabled, |ui| {
             let tx = &self.tx;
-
+    
             CentralPanel::default().show_inside(ui, |ui| {
                 if self.loaded_rom.is_some() {
                     let layout = Layout {
@@ -1437,16 +1437,16 @@ impl Gui {
                         let image = Image::from_texture(self.nes_texture.sized())
                             .shrink_to_fit()
                             .sense(Sense::click());
-
+    
                         let hover_cursor = if cfg.deck.zapper {
                             CursorIcon::Crosshair
                         } else {
                             CursorIcon::Default
                         };
-
+    
                         let res = ui.add(image).on_hover_cursor(hover_cursor);
                         self.nes_frame = res.rect;
-
+    
                         if cfg.deck.zapper {
                             if res.clicked() {
                                 tx.event(EmulationEvent::ZapperTrigger);
@@ -1478,13 +1478,13 @@ impl Gui {
                     });
                 }
             });
-
+    
             let mut recording_labels = Vec::new();
             if self.replay_recording {
-                recording_labels.push("Replay");
+                recording_labels.push(LOCALIZATION.lock().unwrap().get_text("/menu/file/record_replay"));
             }
             if self.audio_recording {
-                recording_labels.push("Audio");
+                recording_labels.push(LOCALIZATION.lock().unwrap().get_text("/menu/file/record_audio"));
             }
             if !recording_labels.is_empty() {
                 Frame::side_top_panel(ui.style()).show(ui, |ui| {
@@ -1493,8 +1493,8 @@ impl Gui {
                         |ui| {
                         ui.label(
                                 RichText::new(format!(
-                                    "Recording {}...",
-                                    recording_labels.join(" & ")
+                                    "{}",
+                                    LOCALIZATION.lock().unwrap().get_text("/ui/recording").replace("{}", &recording_labels.join(" & "))
                                 ))
                                 .italics(),
                             )
@@ -1502,7 +1502,7 @@ impl Gui {
                     );
                 });
             }
-
+    
             if cfg.renderer.show_messages {
                 if let Some(instr) = self.corrupted_cpu_instr {
                     Frame::popup(ui.style()).show(ui, |ui| {
@@ -1512,31 +1512,32 @@ impl Gui {
                                 ui.colored_label(
                                     Color32::RED,
                                     format!(
-                                        "Invalid CPU opcode: ${:02X} {:?} #{:?} encountered. Title: {}",
-                                        instr.opcode(),
-                                        instr.op(),
-                                        instr.addr_mode(),
-                                        self.loaded_rom.as_ref().map(|rom| rom.name.as_str()).unwrap_or_default()
+                                        "{}",
+                                        LOCALIZATION.lock().unwrap().get_text("/ui/invalid_cpu")
+                                            .replace("{0:02X}", &format!("{:02X}", instr.opcode()))
+                                            .replace("{1:?}", &format!("{:?}", instr.op()))
+                                            .replace("{2:?}", &format!("{:?}", instr.addr_mode()))
+                                            .replace("{3}", self.loaded_rom.as_ref().map(|rom| rom.name.as_str()).unwrap_or_default())
                                     ),
                                 );
-
+    
                                 ui.vertical(|ui| {
-                                    ui.label("Recovery options:");
+                                    ui.label(LOCALIZATION.lock().unwrap().get_text("/ui/recovery_options"));
                                     ui.horizontal(|ui| {
-                                        if ui.button("Reset").clicked() {
+                                        if ui.button(LOCALIZATION.lock().unwrap().get_text("/ui/reset")).clicked() {
                                             self.tx.event(EmulationEvent::Reset(ResetKind::Soft));
                                             self.corrupted_cpu_instr = None;
                                         }
-                                        if ui.button("Power Cycle").clicked() {
+                                        if ui.button(LOCALIZATION.lock().unwrap().get_text("/ui/power_cycle")).clicked() {
                                             self.tx.event(EmulationEvent::Reset(ResetKind::Hard));
                                             self.corrupted_cpu_instr = None;
                                         }
                                     });
                                     ui.horizontal(|ui| {
-                                        if ui.button("Clear Save States").clicked() {
+                                        if ui.button(LOCALIZATION.lock().unwrap().get_text("/ui/clear_save_states")).clicked() {
                                             preferences::State::clear_save_states(&self.tx);
                                         }
-                                        if ui.button("Load ROM").clicked() {
+                                        if ui.button(LOCALIZATION.lock().unwrap().get_text("/ui/load_rom")).clicked() {
                                             self.tx.event(UiEvent::LoadRomDialog);
                                         }
                                     });
@@ -1545,7 +1546,7 @@ impl Gui {
                         );
                     });
                 }
-
+    
                 if self.error.is_some() {
                     Frame::popup(ui.style()).show(ui, |ui| {
                         ui.with_layout(
@@ -1556,7 +1557,7 @@ impl Gui {
                         );
                     });
                 }
-
+    
                 if !self.messages.is_empty() {
                     Frame::popup(ui.style()).show(ui, |ui| {
                         ui.with_layout(
@@ -1567,7 +1568,7 @@ impl Gui {
                         );
                     });
                 }
-
+    
                 if self.run_state.paused() {
                     Frame::new().inner_margin(5.0).show(ui, |ui| {
                         ui.heading(RichText::new("⏸").color(Color32::LIGHT_GRAY).size(40.0));
@@ -1576,7 +1577,7 @@ impl Gui {
             }
         });
     }
-
+    
     fn performance_stats(&mut self, ui: &mut Ui, cfg: &Config) {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();

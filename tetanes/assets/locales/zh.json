@@ -16,7 +16,8 @@
         "recovery_options": "恢复选项:",
         "reset": "重置",
         "power_cycle": "电源循环",
-        "clear_save_states": "清除存档"
+        "clear_save_states": "清除存档",
+        "load_rom": "加载ROM"
     },
     "menu": {
         "about": {
