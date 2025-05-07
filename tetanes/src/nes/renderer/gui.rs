@@ -470,7 +470,7 @@ impl Gui {
         self.show_update_window(ctx, viewport_opts.enabled, cfg);
 
         Self::show_viewport(
-            "🔧 UI Settings",
+            LOCALIZATION.lock().unwrap().get_text("/menu/ui_settings"),
             ctx,
             viewport_opts,
             &self.gui_settings_open,
@@ -482,7 +482,7 @@ impl Gui {
         #[cfg(debug_assertions)]
         {
             Self::show_viewport(
-                "🔍 UI Inspection",
+                LOCALIZATION.lock().unwrap().get_text("/menu/ui_inspection"),
                 ctx,
                 viewport_opts,
                 &self.gui_inspection_open,
@@ -491,7 +491,7 @@ impl Gui {
                 },
             );
             Self::show_viewport(
-                "📝 UI Memory",
+                LOCALIZATION.lock().unwrap().get_text("/menu/ui_memory"),
                 ctx,
                 viewport_opts,
                 &self.gui_memory_open,

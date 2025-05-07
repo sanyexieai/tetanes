@@ -21,6 +21,9 @@
         "window": "窗口",
         "debug": "调试",
         "help": "帮助",
+        "ui_settings": "🔧 界面设置",
+        "ui_inspection": "🔍 界面检查",
+        "ui_memory": "📝 界面内存",
         "debug_build": "调试版本",
         "debug_build_tooltip": "TetaNES 以调试模式编译。",
         "update": {
