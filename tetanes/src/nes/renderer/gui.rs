@@ -650,12 +650,12 @@ impl Gui {
                     self.toggle_dark_mode_button( ui);
                     ui.separator();
 
-                    ui.menu_button(format!("📁 {}", self.localized_texts.get_text("menu_file")), |ui| self.file_menu(ui, cfg));
-                    ui.menu_button(format!("🔨 {}", self.localized_texts.get_text("menu_controls")), |ui| self.controls_menu(ui, cfg));
-                    ui.menu_button(format!("🔧 {}", self.localized_texts.get_text("menu_config")), |ui| self.config_menu(ui, cfg));
-                    ui.menu_button(format!("🖵 {}", self.localized_texts.get_text("menu_window")), |ui| self.window_menu(ui, cfg));
-                    ui.menu_button(format!("🕷 {}", self.localized_texts.get_text("menu_debug")), |ui| self.debug_menu(ui, cfg));
-                    ui.menu_button(format!("❓ {}", self.localized_texts.get_text("menu_help")), |ui| self.help_menu(ui));
+                    ui.menu_button(format!("📁 {}", self.localized_texts.get_text("menu/file_text")), |ui| self.file_menu(ui, cfg));
+                    ui.menu_button(format!("🔨 {}", self.localized_texts.get_text("menu/controls_text")), |ui| self.controls_menu(ui, cfg));
+                    ui.menu_button(format!("🔧 {}", self.localized_texts.get_text("menu/config_text")), |ui| self.config_menu(ui, cfg));
+                    ui.menu_button(format!("🖵 {}", self.localized_texts.get_text("menu/window_text")), |ui| self.window_menu(ui, cfg));
+                    ui.menu_button(format!("🕷 {}", self.localized_texts.get_text("menu/debug_text")), |ui| self.debug_menu(ui, cfg));
+                    ui.menu_button(format!("❓ {}", self.localized_texts.get_text("menu/help_text")), |ui| self.help_menu(ui));
                     if cfg!(debug_assertions) {
                         ui.separator();
                         ui.label(
