@@ -3,9 +3,9 @@
 //! It allows for event handling and test abstractions such as being able to map a custom keybind
 //! to a given state change.
 
-use crate::nes::renderer::{gui::Menu, shader::Shader};
-use crate::nes::renderer::gui::localization::Language;
 use crate::nes::renderer::gui::localization::LOCALIZATION;
+use crate::nes::renderer::gui::localization::Language;
+use crate::nes::renderer::{gui::Menu, shader::Shader};
 use serde::{Deserialize, Serialize};
 use tetanes_core::{
     action::Action as DeckAction,
@@ -15,7 +15,6 @@ use tetanes_core::{
     mapper::{Bf909Revision, MapperRevision, Mmc3Revision},
     video::VideoFilter,
 };
-
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Action {
@@ -204,23 +203,35 @@ impl AsRef<str> for Action {
                 Menu::Language => localization.get_text("/menu/language"),
             },
             Action::Feature(feature) => match feature {
-                Feature::ToggleReplayRecording => localization.get_text("/feature/toggle_replay_recording"),
-                Feature::ToggleAudioRecording => localization.get_text("/feature/toggle_audio_recording"),
+                Feature::ToggleReplayRecording => {
+                    localization.get_text("/feature/toggle_replay_recording")
+                }
+                Feature::ToggleAudioRecording => {
+                    localization.get_text("/feature/toggle_audio_recording")
+                }
                 Feature::VisualRewind => localization.get_text("/feature/visual_rewind"),
                 Feature::InstantRewind => localization.get_text("/feature/instant_rewind"),
                 Feature::TakeScreenshot => localization.get_text("/feature/take_screenshot"),
             },
             Action::Setting(setting) => match setting {
                 Setting::ToggleFullscreen => localization.get_text("/setting/toggle_fullscreen"),
-                Setting::ToggleEmbedViewports => localization.get_text("/setting/toggle_embed_viewports"),
-                Setting::ToggleAlwaysOnTop => localization.get_text("/setting/toggle_always_on_top"),
+                Setting::ToggleEmbedViewports => {
+                    localization.get_text("/setting/toggle_embed_viewports")
+                }
+                Setting::ToggleAlwaysOnTop => {
+                    localization.get_text("/setting/toggle_always_on_top")
+                }
                 Setting::ToggleAudio => localization.get_text("/setting/toggle_audio"),
-                Setting::ToggleCycleAccurate => localization.get_text("/setting/toggle_cycle_accurate"),
+                Setting::ToggleCycleAccurate => {
+                    localization.get_text("/setting/toggle_cycle_accurate")
+                }
                 Setting::ToggleRewinding => localization.get_text("/setting/toggle_rewinding"),
                 Setting::ToggleOverscan => localization.get_text("/setting/toggle_overscan"),
                 Setting::ToggleMenubar => localization.get_text("/setting/toggle_menubar"),
                 Setting::ToggleMessages => localization.get_text("/setting/toggle_messages"),
-                Setting::ToggleScreenReader => localization.get_text("/setting/toggle_screen_reader"),
+                Setting::ToggleScreenReader => {
+                    localization.get_text("/setting/toggle_screen_reader")
+                }
                 Setting::ToggleFps => localization.get_text("/setting/toggle_fps"),
                 Setting::FastForward => localization.get_text("/setting/fast_forward"),
                 Setting::IncrementScale => localization.get_text("/setting/increment_scale"),
@@ -229,7 +240,9 @@ impl AsRef<str> for Action {
                 Setting::DecrementSpeed => localization.get_text("/setting/decrement_speed"),
                 Setting::SetShader(shader) => match shader {
                     Shader::Default => localization.get_text("/setting/set_shader_default"),
-                    Shader::CrtEasymode => localization.get_text("/setting/set_shader_crt_easymode"),
+                    Shader::CrtEasymode => {
+                        localization.get_text("/setting/set_shader_crt_easymode")
+                    }
                 },
             },
             Action::Deck(deck) => match deck {
@@ -249,13 +262,23 @@ impl AsRef<str> for Action {
                     JoypadBtn::Select => localization.get_text("/deck/joypad_select"),
                     JoypadBtn::Start => localization.get_text("/deck/joypad_start"),
                 },
-                DeckAction::ToggleZapperConnected => localization.get_text("/deck/toggle_zapper_connected"),
+                DeckAction::ToggleZapperConnected => {
+                    localization.get_text("/deck/toggle_zapper_connected")
+                }
                 DeckAction::ZapperAim(_) => localization.get_text("/deck/zapper_aim"),
-                DeckAction::ZapperAimOffscreen => localization.get_text("/deck/zapper_aim_offscreen"),
+                DeckAction::ZapperAimOffscreen => {
+                    localization.get_text("/deck/zapper_aim_offscreen")
+                }
                 DeckAction::ZapperTrigger => localization.get_text("/deck/zapper_trigger"),
-                DeckAction::FourPlayer(FourPlayer::Disabled) => localization.get_text("/deck/disable_four_player_mode"),
-                DeckAction::FourPlayer(FourPlayer::FourScore) => localization.get_text("/deck/enable_four_player_mode_fourscore"),
-                DeckAction::FourPlayer(FourPlayer::Satellite) => localization.get_text("/deck/enable_four_player_mode_satellite"),
+                DeckAction::FourPlayer(FourPlayer::Disabled) => {
+                    localization.get_text("/deck/disable_four_player_mode")
+                }
+                DeckAction::FourPlayer(FourPlayer::FourScore) => {
+                    localization.get_text("/deck/enable_four_player_mode_fourscore")
+                }
+                DeckAction::FourPlayer(FourPlayer::Satellite) => {
+                    localization.get_text("/deck/enable_four_player_mode_satellite")
+                }
                 DeckAction::SetSaveSlot(1) => localization.get_text("/deck/set_save_slot_1"),
                 DeckAction::SetSaveSlot(2) => localization.get_text("/deck/set_save_slot_2"),
                 DeckAction::SetSaveSlot(3) => localization.get_text("/deck/set_save_slot_3"),

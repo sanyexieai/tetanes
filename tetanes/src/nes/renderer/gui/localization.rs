@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
-use tracing::{error, warn};
 use std::sync::RwLock;
+use tracing::{error, warn};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Language {
@@ -21,6 +21,12 @@ pub struct LocalizedTexts {
     texts: HashMap<String, String>,
 }
 
+impl Default for LocalizedTexts {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LocalizedTexts {
     pub fn new() -> Self {
         Self {
@@ -29,13 +35,9 @@ impl LocalizedTexts {
     }
 
     pub fn get_text(&self, key: &str) -> Option<String> {
-        let text = match self.texts.get(key) {
-            Some(text) => Some(text.clone()),
-            None => None
-        };
-        text
+        self.texts.get(key).cloned()
     }
-    
+
     pub fn insert(&mut self, key: &str, text: String) {
         self.texts.insert(key.to_string(), text);
     }
@@ -48,10 +50,15 @@ lazy_static::lazy_static! {
     pub static ref LOCALIZATIONTEXTS: RwLock<LocalizedTexts> = RwLock::new(LocalizedTexts::new());
 }
 
-
 pub struct Localization {
     translations: HashMap<Language, Value>,
     current_language: Language,
+}
+
+impl Default for Localization {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Localization {
@@ -65,7 +72,7 @@ impl Localization {
             }
             Err(e) => error!("Failed to parse English translations: {}", e),
         }
-        
+
         // 加载中文翻译
         const ZH_TRANSLATIONS: &[u8] = include_bytes!("../../../../assets/locales/zh.json");
         match serde_json::from_slice(ZH_TRANSLATIONS) {
@@ -74,14 +81,14 @@ impl Localization {
             }
             Err(e) => error!("Failed to parse Chinese translations: {}", e),
         }
-                
+
         Self {
             translations,
             current_language: Language::default(),
         }
     }
 
-    pub fn current_language(&self) -> Language {
+    pub const fn current_language(&self) -> Language {
         self.current_language
     }
 
@@ -94,7 +101,7 @@ impl Localization {
 
     pub fn get_text(&self, path: &str) -> String {
         let path = path.trim_start_matches('/');
-        
+
         // 快速路径：尝试从缓存中读取
         if let Ok(localized_texts) = LOCALIZATIONTEXTS.try_read() {
             if let Some(text) = localized_texts.get_text(path) {
@@ -104,15 +111,18 @@ impl Localization {
 
         // 如果缓存中没有，则从翻译文件中读取
         let parts: Vec<&str> = path.split('/').collect();
-                
+
         let translation = match self.translations.get(&self.current_language) {
             Some(t) => t,
             None => {
-                warn!("No translation found for language: {:?}", self.current_language);
+                warn!(
+                    "No translation found for language: {:?}",
+                    self.current_language
+                );
                 return path.to_string();
             }
         };
-        
+
         let mut current = translation;
         for part in parts {
             match current.get(part) {
@@ -123,7 +133,7 @@ impl Localization {
                 }
             }
         }
-        
+
         let result = current.as_str().map(String::from).unwrap_or_else(|| {
             warn!("Invalid translation value for path: {}", path);
             path.to_string()
@@ -136,7 +146,6 @@ impl Localization {
 
         result
     }
-    
 }
 
 lazy_static::lazy_static! {
@@ -150,18 +159,21 @@ mod tests {
     #[test]
     fn test_translations() {
         let mut localization = Localization::new();
-        
+
         // 测试英文翻译
         localization.set_language(Language::English);
         assert_eq!(localization.get_text("/ui/quit"), "Quit");
         assert_eq!(localization.get_text("/menu/about_text"), "About");
-        
+
         // 测试中文翻译
         localization.set_language(Language::Chinese);
         assert_eq!(localization.get_text("/ui/quit"), "退出");
         assert_eq!(localization.get_text("/menu/about_text"), "关于");
-        
+
         // 测试不存在的路径
-        assert_eq!(localization.get_text("/nonexistent/path"), "/nonexistent/path");
+        assert_eq!(
+            localization.get_text("/nonexistent/path"),
+            "/nonexistent/path"
+        );
     }
 }

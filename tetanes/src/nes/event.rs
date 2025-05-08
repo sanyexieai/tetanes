@@ -7,8 +7,8 @@ use crate::{
         emulation::FrameStats,
         input::{ActionBindings, AxisDirection, Gamepads, Input, InputBindings},
         renderer::{
+            gui::localization::{LOCALIZATION, Language},
             gui::{Menu, MessageType},
-            gui::localization::{Language, LOCALIZATION},
             shader::Shader,
         },
         rom::RomData,
@@ -41,7 +41,6 @@ use winit::{
     keyboard::PhysicalKey,
     window::WindowId,
 };
-
 
 #[derive(Default, Debug, Copy, Clone)]
 #[must_use]
@@ -527,7 +526,7 @@ impl ApplicationHandler<NesEvent> for Running {
                     ConfigEvent::HideOverscan(hide) => renderer.hide_overscan = *hide,
                     ConfigEvent::Language(lang) => {
                         LOCALIZATION.write().unwrap().set_language(*lang);
-                    },
+                    }
                     ConfigEvent::MapperRevisions(revs) => deck.mapper_revisions = *revs,
                     ConfigEvent::RamState(ram_state) => deck.ram_state = *ram_state,
                     ConfigEvent::RecentRomsClear => renderer.recent_roms.clear(),
