@@ -87,6 +87,9 @@ impl Localization {
 
     pub fn set_language(&mut self, language: Language) {
         self.current_language = language;
+        if let Ok(mut localized_texts) = LOCALIZATIONTEXTS.try_write() {
+            localized_texts.clear();
+        }
     }
 
     pub fn get_text(&self, path: &str) -> String {
