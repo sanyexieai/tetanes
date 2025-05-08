@@ -90,42 +90,49 @@ impl Localization {
     }
 
     pub fn get_text(&self, path: &str) -> String {
-        let localized_texts = LOCALIZATIONTEXTS.read().unwrap();
-        let text = match localized_texts.get_text(path) {
-            Some(text) => text,
-            None => {
-                let path = path.trim_start_matches('/');
-                let parts: Vec<&str> = path.split('/').collect();
-                        
-                let translation = match self.translations.get(&self.current_language) {
-                    Some(t) => t,
-                    None => {
-                        warn!("No translation found for language: {:?}", self.current_language);
-                        return path.to_string();
-                    }
-                };
-                
-                let mut current = translation;
-                for part in parts {
-                    match current.get(part) {
-                        Some(next) => current = next,
-                        None => {
-                            warn!("No translation found for path: {}", path);
-                            return path.to_string();
-                        }
-                    }
+        // 首先尝试从缓存中读取
+        {
+            if let Ok(localized_texts) = LOCALIZATIONTEXTS.read() {
+                if let Some(text) = localized_texts.get_text(path) {
+                    return text;
                 }
+            }
+        }
+
+        // 如果缓存中没有，则从翻译文件中读取
+        let path = path.trim_start_matches('/');
+        let parts: Vec<&str> = path.split('/').collect();
                 
-                let result = current.as_str().map(String::from).unwrap_or_else(|| {
-                    warn!("Invalid translation value for path: {}", path);
-                    path.to_string()
-                });
-                let mut localized_texts = LOCALIZATIONTEXTS.write().unwrap();
-                localized_texts.insert(path.to_string().as_str(), result.clone());
-                result
+        let translation = match self.translations.get(&self.current_language) {
+            Some(t) => t,
+            None => {
+                warn!("No translation found for language: {:?}", self.current_language);
+                return path.to_string();
             }
         };
-        text
+        
+        let mut current = translation;
+        for part in parts {
+            match current.get(part) {
+                Some(next) => current = next,
+                None => {
+                    warn!("No translation found for path: {}", path);
+                    return path.to_string();
+                }
+            }
+        }
+        
+        let result = current.as_str().map(String::from).unwrap_or_else(|| {
+            warn!("Invalid translation value for path: {}", path);
+            path.to_string()
+        });
+
+        // 更新缓存
+        if let Ok(mut localized_texts) = LOCALIZATIONTEXTS.write() {
+            localized_texts.insert(path, result.clone());
+        }
+
+        result
     }
     
 }
