@@ -324,5 +324,80 @@
             "pal": "PAL",
             "auto": "Auto Detect"
         }
+    },
+    "preferences": {
+        "title": "Preferences",
+        "tabs": {
+            "emulation": "Emulation",
+            "audio": "Audio",
+            "video": "Video",
+            "input": "Input"
+        },
+        "buttons": {
+            "restore_defaults": "Restore Defaults",
+            "clear_save_states": "Clear Save States",
+            "clear_recent_roms": "Clear Recent ROMs",
+            "download_save_states": "Download Save States"
+        },
+        "emulation": {
+            "auto_load": "Auto Load",
+            "auto_load_tooltip": "Automatically load the last save state on ROM load",
+            "auto_save": "Auto Save",
+            "auto_save_tooltip": "Automatically save state at regular intervals",
+            "second": "second",
+            "seconds": "seconds",
+            "frame": "frame",
+            "frames": "frames",
+            "every_prefix": "Every ",
+            "ppu_warmup": "PPU Warmup",
+            "ppu_warmup_tooltip": "Emulate PPU warmup behavior",
+            "speed": "Speed",
+            "speed_tooltip": "Emulation speed multiplier",
+            "run_ahead": "Run Ahead",
+            "run_ahead_tooltip": "Number of frames to run ahead to reduce input lag",
+            "save_slot": "Save Slot",
+            "save_slot_tooltip": "Current save state slot",
+            "four_player": "Four Player",
+            "four_player_tooltip": "Four player adapter configuration",
+            "region": "Region",
+            "region_tooltip": "NES region configuration",
+            "ram_state": "RAM State",
+            "ram_state_tooltip": "Initial RAM state configuration"
+        },
+        "audio": {
+            "enable": "Enable Audio",
+            "pulse1": "Pulse 1",
+            "pulse2": "Pulse 2",
+            "triangle": "Triangle",
+            "noise": "Noise",
+            "dmc": "DMC",
+            "mapper": "Mapper",
+            "buffer_prefix": "Buffer Size: ",
+            "samples_suffix": " samples",
+            "buffer_tooltip": "Audio buffer size in samples",
+            "latency_suffix": "ms",
+            "latency_tooltip": "Audio latency in milliseconds"
+        },
+        "video": {
+            "window_scale": "Window Scale",
+            "filter": "Filter",
+            "shader": "Shader"
+        },
+        "input": {
+            "turbo": "Turbo",
+            "turbo_tooltip": "Enable turbo buttons",
+            "turbo_pulse_prefix": "Pulse Width: ",
+            "frames_suffix": " frames",
+            "turbo_pulse_tooltip": "Number of frames between turbo button pulses",
+            "keybinds_header": "Keybinds",
+            "player1": "Player 1",
+            "player2": "Player 2",
+            "player3": "Player 3",
+            "player4": "Player 4",
+            "player1_controls": "D-Pad: Arrow Keys\nA: Z\nB: X\nSelect: Right Shift\nStart: Enter",
+            "player2_controls": "D-Pad: WASD\nA: F\nB: G\nSelect: R\nStart: T",
+            "player3_controls": "D-Pad: IJKL\nA: ;\nB: '\nSelect: P\nStart: [",
+            "player4_controls": "D-Pad: Numpad 8456\nA: Numpad 1\nB: Numpad 2\nSelect: Numpad 0\nStart: Numpad ."
+        }
     }
 }

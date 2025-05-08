@@ -4,6 +4,8 @@
 //! to a given state change.
 
 use crate::nes::renderer::{gui::Menu, shader::Shader};
+use crate::nes::renderer::gui::localization::Language;
+use crate::nes::renderer::gui::localization::LOCALIZATION;
 use serde::{Deserialize, Serialize};
 use tetanes_core::{
     action::Action as DeckAction,
@@ -14,7 +16,6 @@ use tetanes_core::{
     video::VideoFilter,
 };
 
-use super::renderer::gui::{Language, LOCALIZATION};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Action {

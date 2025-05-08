@@ -324,5 +324,80 @@
             "pal": "PAL",
             "auto": "自动检测"
         }
+    },
+    "preferences": {
+        "title": "偏好设置",
+        "tabs": {
+            "emulation": "模拟器",
+            "audio": "音频",
+            "video": "视频",
+            "input": "输入"
+        },
+        "buttons": {
+            "restore_defaults": "恢复默认",
+            "clear_save_states": "清除存档",
+            "clear_recent_roms": "清除最近游戏",
+            "download_save_states": "下载存档"
+        },
+        "emulation": {
+            "auto_load": "自动加载",
+            "auto_load_tooltip": "加载ROM时自动加载最后的存档",
+            "auto_save": "自动保存",
+            "auto_save_tooltip": "定期自动保存存档",
+            "second": "秒",
+            "seconds": "秒",
+            "frame": "帧",
+            "frames": "帧",
+            "every_prefix": "每",
+            "ppu_warmup": "PPU预热",
+            "ppu_warmup_tooltip": "模拟PPU预热行为",
+            "speed": "速度",
+            "speed_tooltip": "模拟器速度倍数",
+            "run_ahead": "提前运行",
+            "run_ahead_tooltip": "提前运行的帧数以减少输入延迟",
+            "save_slot": "存档槽",
+            "save_slot_tooltip": "当前存档槽位",
+            "four_player": "四人游戏",
+            "four_player_tooltip": "四人适配器配置",
+            "region": "区域",
+            "region_tooltip": "NES区域配置",
+            "ram_state": "RAM状态",
+            "ram_state_tooltip": "初始RAM状态配置"
+        },
+        "audio": {
+            "enable": "启用音频",
+            "pulse1": "脉冲1",
+            "pulse2": "脉冲2",
+            "triangle": "三角波",
+            "noise": "噪音",
+            "dmc": "DMC",
+            "mapper": "Mapper",
+            "buffer_prefix": "缓冲大小：",
+            "samples_suffix": "采样",
+            "buffer_tooltip": "音频缓冲区大小（采样数）",
+            "latency_suffix": "毫秒",
+            "latency_tooltip": "音频延迟（毫秒）"
+        },
+        "video": {
+            "window_scale": "窗口缩放",
+            "filter": "滤镜",
+            "shader": "着色器"
+        },
+        "input": {
+            "turbo": "连发",
+            "turbo_tooltip": "启用连发按钮",
+            "turbo_pulse_prefix": "脉冲宽度：",
+            "frames_suffix": "帧",
+            "turbo_pulse_tooltip": "连发按钮脉冲之间的帧数",
+            "keybinds_header": "按键绑定",
+            "player1": "玩家1",
+            "player2": "玩家2",
+            "player3": "玩家3",
+            "player4": "玩家4",
+            "player1_controls": "方向键：方向键\nA键：Z\nB键：X\n选择：右Shift\n开始：Enter",
+            "player2_controls": "方向键：WASD\nA键：F\nB键：G\n选择：R\n开始：T",
+            "player3_controls": "方向键：IJKL\nA键：;\nB键：'\n选择：P\n开始：[",
+            "player4_controls": "方向键：数字键盘8456\nA键：数字键盘1\nB键：数字键盘2\n选择：数字键盘0\n开始：数字键盘."
+        }
     }
 }

@@ -19,6 +19,7 @@ use crate::{
                 },
                 ppu_viewer::PpuViewer,
                 preferences::Preferences,
+                localization::{Language, LOCALIZATION, LocalizedTexts},
             },
             painter::RenderState,
             texture::Texture,
@@ -36,7 +37,6 @@ use egui::{
     style::{HandleShape, Selection, TextCursorStyle, WidgetVisuals},
 };
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
@@ -51,18 +51,12 @@ use tetanes_core::{
 };
 use tracing::{error, info, warn};
 use winit::event::WindowEvent;
-use std::collections::HashMap;
-use serde_json;
-
 mod keybinds;
 pub mod lib;
 mod ppu_viewer;
 mod preferences;
+pub mod localization;
 
-
-lazy_static::lazy_static! {
-    pub static ref LOCALIZATION: std::sync::RwLock<Localization> = std::sync::RwLock::new(Localization::new());
-}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Menu {
@@ -79,106 +73,6 @@ pub enum MessageType {
     Info,
     Warn,
     Error,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Language {
-    English,
-    Chinese,
-}
-
-impl Default for Language {
-    fn default() -> Self {
-        Self::Chinese
-    }
-}
-
-#[derive(Debug)]
-pub struct Localization {
-    translations: HashMap<Language, Value>,
-    current_language: Language,
-}
-
-impl Localization {
-    pub fn new() -> Self {
-        let mut translations = HashMap::new();
-        
-        // 测试文件路径
-        info!("Current directory: {:?}", std::env::current_dir());
-        
-        // 加载英文翻译
-        const EN_TRANSLATIONS: &[u8] = include_bytes!("../../../assets/locales/en.json");
-        info!("Attempting to load English translations...");
-        match serde_json::from_slice(EN_TRANSLATIONS) {
-            Ok(json) => {
-                translations.insert(Language::English, json);
-                info!("Successfully loaded English translations");
-            }
-            Err(e) => error!("Failed to parse English translations: {}", e),
-        }
-        
-        // 加载中文翻译
-        const ZH_TRANSLATIONS: &[u8] = include_bytes!("../../../assets/locales/zh.json");
-        info!("Attempting to load Chinese translations...");
-        match serde_json::from_slice(ZH_TRANSLATIONS) {
-            Ok(json) => {
-                translations.insert(Language::Chinese, json);
-                info!("Successfully loaded Chinese translations");
-            }
-            Err(e) => error!("Failed to parse Chinese translations: {}", e),
-        }
-        
-        info!("Current translations map: {:?}", translations.keys().collect::<Vec<_>>());
-        
-        Self {
-            translations,
-            current_language: Language::default(),
-        }
-    }
-
-    pub fn current_language(&self) -> Language {
-        info!("Current language: {:?}", self.current_language);
-        self.current_language
-    }
-
-    pub fn set_language(&mut self, language: Language) {
-        info!("Setting language to: {:?}", language);
-        self.current_language = language;
-    }
-
-    pub fn get_text(&self, path: &str) -> String {
-        let path = path.trim_start_matches('/');
-        let parts: Vec<&str> = path.split('/').collect();
-        
-        info!("Getting text for path: {}, current language: {:?}", path, self.current_language);
-        
-        let translation = match self.translations.get(&self.current_language) {
-            Some(t) => t,
-            None => {
-                warn!("No translation found for language: {:?}", self.current_language);
-                return path.to_string();
-            }
-        };
-        
-        let mut current = translation;
-        for part in parts {
-            match current.get(part) {
-                Some(next) => current = next,
-                None => {
-                    warn!("No translation found for path: {}", path);
-                    return path.to_string();
-                }
-            }
-        }
-        
-        let result = current.as_str().map(String::from).unwrap_or_else(|| {
-            warn!("Invalid translation value for path: {}", path);
-            path.to_string()
-        });
-        
-        info!("Translation result for path {}: {}", path, result);
-        result
-    }
 }
 
 #[derive(Debug)]
@@ -219,8 +113,7 @@ pub struct Gui {
     pub error: Option<String>,
     enable_auto_update: bool,
     dont_show_updates: bool,
-    // 添加本地化字符串缓存
-    localized_texts: HashMap<String, String>,
+    localized_texts: LocalizedTexts,
 }
 
 impl Gui {
@@ -246,7 +139,7 @@ impl Gui {
             Some(LOCALIZATION.read().unwrap().get_text("/ui/nes_frame")),
         );
 
-        let mut gui = Self {
+        let gui = Self {
             ctx,
             initialized: false,
             title: Config::WINDOW_TITLE.to_string(),
@@ -282,40 +175,9 @@ impl Gui {
             error: None,
             enable_auto_update: false,
             dont_show_updates: false,
-            localized_texts: HashMap::new(),
+            localized_texts: LocalizedTexts::new(),
         };
-        
-        gui.update_localized_texts();
         gui
-    }
-
-    fn update_localized_texts(&mut self) {
-        let localization = LOCALIZATION.read().unwrap();
-        self.localized_texts.clear();
-        
-        // 菜单文本
-        self.localized_texts.insert("menu_file".to_string(), localization.get_text("/menu/file_text"));
-        self.localized_texts.insert("menu_controls".to_string(), localization.get_text("/menu/controls_text"));
-        self.localized_texts.insert("menu_config".to_string(), localization.get_text("/menu/config_text"));
-        self.localized_texts.insert("menu_window".to_string(), localization.get_text("/menu/window_text"));
-        self.localized_texts.insert("menu_debug".to_string(), localization.get_text("/menu/debug_text"));
-        self.localized_texts.insert("menu_help".to_string(), localization.get_text("/menu/help_text"));
-        self.localized_texts.insert("menu_about".to_string(), localization.get_text("/menu/about_text"));
-        
-        // 窗口标题
-        self.localized_texts.insert("performance_stats".to_string(), localization.get_text("/ui/performance_stats"));
-        self.localized_texts.insert("no_rom_loaded".to_string(), localization.get_text("/ui/no_rom_loaded"));
-        
-        // 其他常用文本
-        self.localized_texts.insert("debug_build".to_string(), localization.get_text("/menu/debug_build"));
-        self.localized_texts.insert("debug_build_tooltip".to_string(), localization.get_text("/menu/debug_build_tooltip"));
-    }
-
-    fn get_text(&self, key: &str) -> String {
-        self.localized_texts.get(key).cloned().unwrap_or_else(|| {
-            let localization = LOCALIZATION.read().unwrap();
-            localization.get_text(key)
-        })
     }
 
     pub fn on_window_event(&mut self, event: &WindowEvent) -> Response {
@@ -401,14 +263,12 @@ impl Gui {
                     Menu::Preferences => self.preferences.toggle_open(&self.ctx),
                     Menu::Language => {
                         let current_lang = LOCALIZATION.read().unwrap().current_language();
-                        info!("Current language before switch: {:?}", current_lang);
                         let new_lang = match current_lang {
                             Language::English => Language::Chinese,
                             Language::Chinese => Language::English,
                         };
-                        info!("Switching to language: {:?}", new_lang);
+                        self.localized_texts.clear();
                         LOCALIZATION.write().unwrap().set_language(new_lang);
-                        self.update_localized_texts(); // 更新缓存的文本
                         self.tx.event(ConfigEvent::Language(new_lang));
                     }
                 },
@@ -487,7 +347,7 @@ impl Gui {
         self.show_update_window(ctx, viewport_opts.enabled, cfg);
 
         Self::show_viewport(
-            self.get_text("menu/ui_settings"),
+            self.localized_texts.get_text("menu/ui_settings"),
             ctx,
             viewport_opts,
             &self.gui_settings_open,
@@ -499,7 +359,7 @@ impl Gui {
         #[cfg(debug_assertions)]
         {
             Self::show_viewport(
-                self.get_text("menu/ui_inspection"),
+                self.localized_texts.get_text("menu/ui_inspection"),
                 ctx,
                 viewport_opts,
                 &self.gui_inspection_open,
@@ -508,7 +368,7 @@ impl Gui {
                 },
             );
             Self::show_viewport(
-                self.get_text("menu/ui_memory"),
+                self.localized_texts.get_text("menu/ui_memory"),
                 ctx,
                 viewport_opts,
                 &self.gui_memory_open,
@@ -587,7 +447,7 @@ impl Gui {
         puffin::profile_function!();
 
         let mut about_open = self.about_open;
-        egui::Window::new(self.get_text("menu_about"))
+        egui::Window::new(self.localized_texts.get_text("menu_about"))
             .open(&mut about_open)
             .show(ctx, |ui| self.about(ui, enabled));
         self.about_open = about_open;
@@ -604,7 +464,7 @@ impl Gui {
         let mut about_homebrew_open = true;
         egui::Window::new(format!(
             "{}",
-            self.get_text("/ui/about_rom").replace("{}", &rom.name)
+            self.localized_texts.get_text("/ui/about_rom").replace("{}", &rom.name)
         ))
             .open(&mut about_homebrew_open)
             .show(ctx, |ui| {
@@ -636,7 +496,7 @@ impl Gui {
     ) {
         egui::Window::new(format!(
             "{}",
-            self.get_text("/ui/viewport_info").replace("{}", &format!("{id:?}"))
+            self.localized_texts.get_text("/ui/viewport_info").replace("{}", &format!("{id:?}"))
         ))
         .open(&mut self.viewport_info_open)
         .show(ctx, |ui| info.ui(ui));
@@ -647,7 +507,7 @@ impl Gui {
         puffin::profile_function!();
 
         let mut perf_stats_open = self.perf_stats_open;
-        egui::Window::new(self.get_text("performance_stats"))
+        egui::Window::new(self.localized_texts.get_text("performance_stats"))
             .open(&mut perf_stats_open)
             .show(ctx, |ui| {
                 ui.add_enabled_ui(enabled, |ui| self.performance_stats(ui, cfg));
@@ -704,14 +564,14 @@ impl Gui {
 
         let mut update_window_open = self.update_window_open && cfg.renderer.show_updates;
         let mut close_window = false;
-        egui::Window::new(self.get_text("/ui/update_available"))
+        egui::Window::new(self.localized_texts.get_text("/ui/update_available"))
             .open(&mut update_window_open)
             .resizable(false)
             .show(ctx, |ui| {
                 ui.add_enabled_ui(enabled, |ui| {
                     ui.label(format!(
                         "{} (v{})",
-                        self.get_text("/menu/update/update_available"),
+                        self.localized_texts.get_text("/menu/update/update_available"),
                         self.version.latest(),
                     ));
                     ui.hyperlink("https://github.com/lukexor/tetanes/releases");
@@ -719,43 +579,44 @@ impl Gui {
                     ui.add_space(15.0);
 
                     if self.enable_auto_update {
-                        ui.label(self.get_text("/menu/update/update"));
+                        ui.label(self.localized_texts.get_text("/menu/update/update"));
                         ui.add_space(15.0);
 
-                        let dont_show_text = self.get_text("/menu/update/dont_show");
+                        let dont_show_text = self.localized_texts.get_text("/menu/update/dont_show");
                         ui.checkbox(&mut self.dont_show_updates, dont_show_text);
                         ui.add_space(15.0);
 
                         ui.with_layout(Layout::right_to_left(Align::Min), |ui| {
-                            let res = ui.button(self.get_text("/menu/update/close")).on_hover_text(format!(
+                            let res = ui.button(self.localized_texts.get_text("/menu/update/close")).on_hover_text(format!(
                                 "{} (v{}).",
-                                self.get_text("/menu/update/update_not_available"),
+                                self.localized_texts.get_text("/menu/update/update_not_available"),
                                 self.version.current()
                             ));
                             if res.clicked() {
                                 close_window = true;
                             }
 
-                            let res = ui.button(self.get_text("/menu/update/download")).on_hover_text(format!(
+                            let res = ui.button(self.localized_texts.get_text("/menu/update/download")).on_hover_text(format!(
                                 "{} (v{}).",
-                                self.get_text("/menu/update/update"),
+                                self.localized_texts.get_text("/menu/update/update"),
                                 self.version.current()
                             ));
+                            let localized_texts = self.localized_texts.get_text("/menu/update/update_error");
                             if res.clicked() {
                                 if let Err(err) = self.version.install_update_and_restart() {
                                     self.add_message(
                                         MessageType::Error,
-                                        format!("{}: {}", self.get_text("/menu/update/update_error"), err),
+                                        format!("{}: {}", localized_texts.clone(), err),
                                     );
                                     close_window = true;
                                 }
                             }
                         });
                     } else {
-                        ui.label(self.get_text("/menu/update/update_not_available"));
+                        ui.label(self.localized_texts.get_text("/menu/update/update_not_available"));
                         ui.add_space(15.0);
 
-                        let dont_show_text = self.get_text("/menu/update/dont_show");
+                        let dont_show_text = self.localized_texts.get_text("/menu/update/dont_show");
                         ui.checkbox(&mut self.dont_show_updates, dont_show_text);
                         ui.add_space(15.0);
 
@@ -789,20 +650,20 @@ impl Gui {
                     self.toggle_dark_mode_button( ui);
                     ui.separator();
 
-                    ui.menu_button(format!("📁 {}", self.get_text("menu_file")), |ui| self.file_menu(ui, cfg));
-                    ui.menu_button(format!("🔨 {}", self.get_text("menu_controls")), |ui| self.controls_menu(ui, cfg));
-                    ui.menu_button(format!("🔧 {}", self.get_text("menu_config")), |ui| self.config_menu(ui, cfg));
-                    ui.menu_button(format!("🖵 {}", self.get_text("menu_window")), |ui| self.window_menu(ui, cfg));
-                    ui.menu_button(format!("🕷 {}", self.get_text("menu_debug")), |ui| self.debug_menu(ui, cfg));
-                    ui.menu_button(format!("❓ {}", self.get_text("menu_help")), |ui| self.help_menu(ui));
+                    ui.menu_button(format!("📁 {}", self.localized_texts.get_text("menu_file")), |ui| self.file_menu(ui, cfg));
+                    ui.menu_button(format!("🔨 {}", self.localized_texts.get_text("menu_controls")), |ui| self.controls_menu(ui, cfg));
+                    ui.menu_button(format!("🔧 {}", self.localized_texts.get_text("menu_config")), |ui| self.config_menu(ui, cfg));
+                    ui.menu_button(format!("🖵 {}", self.localized_texts.get_text("menu_window")), |ui| self.window_menu(ui, cfg));
+                    ui.menu_button(format!("🕷 {}", self.localized_texts.get_text("menu_debug")), |ui| self.debug_menu(ui, cfg));
+                    ui.menu_button(format!("❓ {}", self.localized_texts.get_text("menu_help")), |ui| self.help_menu(ui));
                     if cfg!(debug_assertions) {
                         ui.separator();
                         ui.label(
-                            RichText::new(format!("⚠ {} ⚠", self.get_text("debug_build")))
+                            RichText::new(format!("⚠ {} ⚠", self.localized_texts.get_text("debug_build")))
                                 .small()
                                 .color(ui.visuals().warn_fg_color),
                         )
-                        .on_hover_text(self.get_text("debug_build_tooltip"));
+                        .on_hover_text(self.localized_texts.get_text("debug_build_tooltip"));
                     }
                 });
             });
@@ -817,8 +678,8 @@ impl Gui {
     }
 
     pub fn toggle_dark_mode_button(&mut self, ui: &mut Ui) {
-        let switch_to_light = self.get_text("/menu/window/switch_to_light");
-        let switch_to_dark = self.get_text("/menu/window/switch_to_dark");
+        let switch_to_light = self.localized_texts.get_text("/menu/window/switch_to_light");
+        let switch_to_dark = self.localized_texts.get_text("/menu/window/switch_to_dark");
         if ui.ctx().style().visuals.dark_mode {
             let button = Button::new("☀").frame(false);
             let res = ui.add(button).on_hover_text(switch_to_light);
@@ -840,7 +701,7 @@ impl Gui {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
 
-        let button = Button::new(format!("📂 {}", self.get_text("menu_file")))
+        let button = Button::new(format!("📂 {}", self.localized_texts.get_text("menu_file")))
             .shortcut_text(cfg.shortcut(UiAction::LoadRom));
         if ui.add(button).clicked() {
             if self.loaded_rom.is_some() {
@@ -851,12 +712,12 @@ impl Gui {
             ui.close_menu();
         }
 
-        ui.menu_button(format!("🍺 {}", self.get_text("menu/file/homebrew_rom")), |ui| self.homebrew_rom_menu(ui));
+        ui.menu_button(format!("🍺 {}", self.localized_texts.get_text("menu/file/homebrew_rom")), |ui| self.homebrew_rom_menu(ui));
 
         let tx = &self.tx;
-        let menu_file_unload_rom = self.get_text("menu/file/unload_rom");
-        let menu_file_load_replay = self.get_text("menu/file/load_replay");
-        let menu_file_load_replay_tooltip = self.get_text("/menu/file/load_replay_tooltip");
+        let menu_file_unload_rom = self.localized_texts.get_text("menu/file/unload_rom");
+        let menu_file_load_replay = self.localized_texts.get_text("menu/file/load_replay");
+        let menu_file_load_replay_tooltip = self.localized_texts.get_text("/menu/file/load_replay_tooltip");
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
             let button = Button::new(format!("⏹ {}", menu_file_unload_rom))
                 .shortcut_text(cfg.shortcut(UiAction::UnloadRom));
@@ -881,10 +742,10 @@ impl Gui {
         });
 
         if feature!(Filesystem) {
-            ui.menu_button(format!("🗄 {}", self.get_text("menu/file/recent_roms")), |ui| {
+            ui.menu_button(format!("🗄 {}", self.localized_texts.get_text("menu/file/recent_roms")), |ui| {
                 ui.scope_builder(UiBuilder::new().sizing_pass(), |ui| {
                     if cfg.renderer.recent_roms.is_empty() {
-                        ui.label(self.get_text("menu/file/no_recent_roms"));
+                        ui.label(self.localized_texts.get_text("menu/file/no_recent_roms"));
                     } else {
                         for rom in &cfg.renderer.recent_roms {
                             ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
@@ -901,7 +762,7 @@ impl Gui {
                                             None => {
                                                 tx.event(UiEvent::Message((
                                                     MessageType::Error,
-                                                    self.get_text("/menu/file/load_rom_error").into(),
+                                                    self.localized_texts.get_text("/menu/file/load_rom_error").into(),
                                                 )));
                                             }
                                         }
@@ -922,28 +783,28 @@ impl Gui {
 
         if feature!(Storage) {
             ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
-                let button = Button::new(format!("💾 {}", self.get_text("menu/file/save_state")))
+                let button = Button::new(format!("💾 {}", self.localized_texts.get_text("menu/file/save_state")))
                     .shortcut_text(cfg.shortcut(DeckAction::SaveState));
                 let res = ui
                     .add(button)
-                    .on_hover_text(self.get_text("/menu/file/save_state_tooltip"))
+                    .on_hover_text(self.localized_texts.get_text("/menu/file/save_state_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::SaveState(cfg.emulation.save_slot));
                 };
 
-                let button = Button::new(format!("⎗ {}", self.get_text("menu/file/load_state")))
+                let button = Button::new(format!("⎗ {}", self.localized_texts.get_text("menu/file/load_state")))
                     .shortcut_text(cfg.shortcut(DeckAction::LoadState));
                 let res = ui
                     .add(button)
-                    .on_hover_text(self.get_text("/menu/file/load_state_tooltip"))
+                    .on_hover_text(self.localized_texts.get_text("/menu/file/load_state_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::LoadState(cfg.emulation.save_slot));
                 }
             });
 
-            ui.menu_button(format!("󾠬 {}", self.get_text("menu/file/save_slot")), |ui| {
+            ui.menu_button(format!("󾠬 {}", self.localized_texts.get_text("menu/file/save_slot")), |ui| {
                 Preferences::save_slot_radio(
                     tx,
                     ui,
@@ -957,7 +818,7 @@ impl Gui {
         if feature!(OsViewports) {
             ui.separator();
 
-            let button = Button::new(format!("⎆ {}", self.get_text("/menu/file/quit")))
+            let button = Button::new(format!("⎆ {}", self.localized_texts.get_text("/menu/file/quit")))
                 .shortcut_text(cfg.shortcut(UiAction::Quit));
             if ui.add(button).clicked() {
                 tx.event(UiEvent::Terminate);
@@ -997,8 +858,8 @@ impl Gui {
     
         let tx = &self.tx;
         let is_paused = self.run_state.paused();
-        let resume_text = self.get_text("/menu/controls/resume");
-        let pause_text = self.get_text("/menu/controls/pause");
+        let resume_text = self.localized_texts.get_text("/menu/controls/resume");
+        let pause_text = self.localized_texts.get_text("/menu/controls/pause");
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
             let button = Button::new(if is_paused {
                 format!("▶ {}", resume_text)
@@ -1018,9 +879,9 @@ impl Gui {
         });
     
         let button = Button::new(if cfg.audio.enabled {
-            format!("🔇 {}", self.get_text("/menu/controls/mute"))
+            format!("🔇 {}", self.localized_texts.get_text("/menu/controls/mute"))
         } else {
-            format!("🔊 {}", self.get_text("/menu/controls/unmute"))
+            format!("🔊 {}", self.localized_texts.get_text("/menu/controls/unmute"))
         })
         .shortcut_text(cfg.shortcut(Setting::ToggleAudio));
         if ui.add(button).clicked() {
@@ -1031,16 +892,16 @@ impl Gui {
     
         ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
             ui.add_enabled_ui(cfg.emulation.rewind, |ui| {
-                let button = Button::new(format!("⟲ {}", self.get_text("/menu/controls/instant_rewind")))
+                let button = Button::new(format!("⟲ {}", self.localized_texts.get_text("/menu/controls/instant_rewind")))
                     .shortcut_text(cfg.shortcut(Feature::InstantRewind));
                 let disabled_hover_text = if self.loaded_rom.is_none() {
                     Self::no_rom_loaded()
                 } else {
-                    self.get_text("/menu/controls/rewind_disabled")
+                    self.localized_texts.get_text("/menu/controls/rewind_disabled")
                 };
                 let res = ui
                     .add(button)
-                    .on_hover_text(self.get_text("/menu/controls/instant_rewind_tooltip"))
+                    .on_hover_text(self.localized_texts.get_text("/menu/controls/instant_rewind_tooltip"))
                     .on_disabled_hover_text(disabled_hover_text);
                 if res.clicked() {
                     tx.event(EmulationEvent::InstantRewind);
@@ -1048,22 +909,22 @@ impl Gui {
                 };
             });
     
-            let button = Button::new(format!("🔃 {}", self.get_text("/menu/controls/reset")))
+            let button = Button::new(format!("🔃 {}", self.localized_texts.get_text("/menu/controls/reset")))
                 .shortcut_text(cfg.shortcut(DeckAction::Reset(ResetKind::Soft)));
             let res = ui
                 .add(button)
-                .on_hover_text(self.get_text("/menu/controls/reset_tooltip"))
+                .on_hover_text(self.localized_texts.get_text("/menu/controls/reset_tooltip"))
                 .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::Reset(ResetKind::Soft));
                 ui.close_menu();
             };
     
-            let button = Button::new(format!("🔌 {}", self.get_text("/menu/controls/power_cycle")))
+            let button = Button::new(format!("🔌 {}", self.localized_texts.get_text("/menu/controls/power_cycle")))
                 .shortcut_text(cfg.shortcut(DeckAction::Reset(ResetKind::Hard)));
             let res = ui
                 .add(button)
-                .on_hover_text(self.get_text("/menu/controls/power_cycle_tooltip"))
+                .on_hover_text(self.localized_texts.get_text("/menu/controls/power_cycle_tooltip"))
                 .on_disabled_hover_text(Self::no_rom_loaded());
             if res.clicked() {
                 tx.event(EmulationEvent::Reset(ResetKind::Hard));
@@ -1075,7 +936,7 @@ impl Gui {
             ui.separator();
     
             ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
-                let button = Button::new(format!("🖼 {}", self.get_text("/menu/file/screenshot")))
+                let button = Button::new(format!("🖼 {}", self.localized_texts.get_text("/menu/file/screenshot")))
                     .shortcut_text(cfg.shortcut(Feature::TakeScreenshot));
                 let res = ui.add(button).on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
@@ -1084,15 +945,15 @@ impl Gui {
                 };
     
                 let button_txt = if self.replay_recording {
-                    format!("⏹ {}", self.get_text("/menu/file/stop_replay"))
+                    format!("⏹ {}", self.localized_texts.get_text("/menu/file/stop_replay"))
                 } else {
-                    format!("🎞 {}", self.get_text("/menu/file/record_replay"))
+                    format!("🎞 {}", self.localized_texts.get_text("/menu/file/record_replay"))
                 };
                 let button = Button::new(button_txt)
                     .shortcut_text(cfg.shortcut(Feature::ToggleReplayRecording));
                 let res = ui
                     .add(button)
-                    .on_hover_text(self.get_text("/menu/file/replay_tooltip"))
+                    .on_hover_text(self.localized_texts.get_text("/menu/file/replay_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::ReplayRecord(!self.replay_recording));
@@ -1100,15 +961,15 @@ impl Gui {
                 };
     
                 let button_txt = if self.audio_recording {
-                    format!("⏹ {}", self.get_text("/menu/file/stop_audio"))
+                    format!("⏹ {}", self.localized_texts.get_text("/menu/file/stop_audio"))
                 } else {
-                    format!("🎤 {}", self.get_text("/menu/file/record_audio"))
+                    format!("🎤 {}", self.localized_texts.get_text("/menu/file/record_audio"))
                 };
                 let button = Button::new(button_txt)
                     .shortcut_text(cfg.shortcut(Feature::ToggleAudioRecording));
                 let res = ui
                     .add(button)
-                    .on_hover_text(self.get_text("/menu/file/audio_tooltip"))
+                    .on_hover_text(self.localized_texts.get_text("/menu/file/audio_tooltip"))
                     .on_disabled_hover_text(Self::no_rom_loaded());
                 if res.clicked() {
                     tx.event(EmulationEvent::AudioRecord(!self.audio_recording));
@@ -1151,9 +1012,9 @@ impl Gui {
 
         ui.separator();
 
-        ui.menu_button(format!("🕒 {}", self.get_text("/menu/config/emulation")), |ui| {
+        ui.menu_button(format!("🕒 {}", self.localized_texts.get_text("/menu/config/emulation")), |ui| {
             let speed = cfg.emulation.speed;
-            let button = Button::new(self.get_text("/setting/increment_speed"))
+            let button = Button::new(self.localized_texts.get_text("/setting/increment_speed"))
                 .shortcut_text(cfg.shortcut(Setting::IncrementSpeed));
             if ui.add(button).clicked() {
                 let new_speed = cfg.next_increment_speed();
@@ -1162,7 +1023,7 @@ impl Gui {
                 }
             }
 
-            let button = Button::new(self.get_text("/setting/decrement_speed"))
+            let button = Button::new(self.localized_texts.get_text("/setting/decrement_speed"))
                 .shortcut_text(cfg.shortcut(Setting::DecrementSpeed));
             if ui.add(button).clicked() {
                 let new_speed = cfg.next_decrement_speed();
@@ -1172,22 +1033,22 @@ impl Gui {
             }
             Preferences::speed_slider(tx, ui, cfg.emulation.speed);
         });
-        ui.menu_button(format!("💾 {}",self.get_text("menu/config/run_ahead")), |ui| {
+        ui.menu_button(format!("💾 {}",self.localized_texts.get_text("menu/config/run_ahead")), |ui| {
             Preferences::run_ahead_slider(tx, ui, cfg.emulation.run_ahead);
         });
 
         ui.separator();
 
-        ui.menu_button(format!("🌉 {}", self.get_text("/menu/config/video")), |ui| {
+        ui.menu_button(format!("🌉 {}", self.localized_texts.get_text("/menu/config/video")), |ui| {
             Preferences::video_filter_radio(tx, ui, cfg.deck.filter, cfg, ShowShortcut::Yes);
         });
-        ui.menu_button(format!("🕶 {}", self.get_text("/menu/config/shader")), |ui| {
+        ui.menu_button(format!("🕶 {}", self.localized_texts.get_text("/menu/config/shader")), |ui| {
             Preferences::shader_radio(tx, ui, cfg.renderer.shader, cfg, ShowShortcut::Yes);
         });
-        ui.menu_button(format!("🌎 {}", self.get_text("/menu/config/region")), |ui| {
+        ui.menu_button(format!("🌎 {}", self.localized_texts.get_text("/menu/config/region")), |ui| {
             Preferences::nes_region_radio(tx, ui, cfg.deck.region);
         });
-        ui.menu_button(format!("🌐 {}", self.get_text("/menu/language")), |ui| {
+        ui.menu_button(format!("🌐 {}", self.localized_texts.get_text("/menu/language")), |ui| {
             let mut current_lang = LOCALIZATION.read().unwrap().current_language();
             if ui.radio_value(&mut current_lang, Language::English, "English").clicked() {
                 self.tx.event(ConfigEvent::Language(Language::English));
@@ -1198,10 +1059,10 @@ impl Gui {
                 ui.close_menu();
             }
         });
-        ui.menu_button(format!("🎮 {}", self.get_text("/menu/config/input")), |ui| {
+        ui.menu_button(format!("🎮 {}", self.localized_texts.get_text("/menu/config/input")), |ui| {
             Preferences::four_player_radio(tx, ui, cfg.deck.four_player);
         });
-        ui.menu_button(format!("📓 {}", self.get_text("/menu/config/genie_codes")), |ui| {
+        ui.menu_button(format!("📓 {}", self.localized_texts.get_text("/menu/config/genie_codes")), |ui| {
             self.preferences.show_genie_codes_entry(ui, cfg);
 
             ui.separator();
@@ -1212,7 +1073,7 @@ impl Gui {
         ui.separator();
 
         let mut preferences_open = self.preferences.open();
-        let toggle = ToggleValue::new(&mut preferences_open, format!("🔧 {}", self.get_text("/menu/preferences")))
+        let toggle = ToggleValue::new(&mut preferences_open, format!("🔧 {}", self.localized_texts.get_text("/menu/preferences")))
             .shortcut_text(cfg.shortcut(Menu::Preferences));
         if ui.add(toggle).clicked() {
             self.preferences.set_open(preferences_open, &self.ctx);
@@ -1220,7 +1081,7 @@ impl Gui {
         }
 
         let mut keybinds_open = self.keybinds.open();
-        let toggle = ToggleValue::new(&mut keybinds_open, format!("🖮 {}", self.get_text("/menu/keybinds")))
+        let toggle = ToggleValue::new(&mut keybinds_open, format!("🖮 {}", self.localized_texts.get_text("/menu/keybinds")))
             .shortcut_text(cfg.shortcut(Menu::Keybinds));
         if ui.add(toggle).clicked() {
             self.keybinds.set_open(keybinds_open, &self.ctx);
@@ -1244,8 +1105,8 @@ impl Gui {
             ..
         } = cfg.renderer;
 
-        ui.menu_button(format!("📏 {}", self.get_text("/menu/window/scale")), |ui| {
-            let button = Button::new(self.get_text("/setting/increment_scale"))
+        ui.menu_button(format!("📏 {}", self.localized_texts.get_text("/menu/window/scale")), |ui| {
+            let button = Button::new(self.localized_texts.get_text("/setting/increment_scale"))
                 .shortcut_text(cfg.shortcut(IncrementScale));
             if ui.add(button).clicked() {
                 let new_scale = cfg.next_increment_scale();
@@ -1254,7 +1115,7 @@ impl Gui {
                 }
             }
 
-            let button = Button::new(self.get_text("/setting/decrement_scale"))
+            let button = Button::new(self.localized_texts.get_text("/setting/decrement_scale"))
                 .shortcut_text(cfg.shortcut(DecrementScale));
             if ui.add(button).clicked() {
                 let new_scale = cfg.next_decrement_scale();
@@ -1297,11 +1158,11 @@ impl Gui {
         }
 
         let mut perf_stats_open = self.perf_stats_open;
-        let toggle = ToggleValue::new(&mut perf_stats_open, format!("🛠 {}", self.get_text("/menu/perf_stats")))
+        let toggle = ToggleValue::new(&mut perf_stats_open, format!("🛠 {}", self.localized_texts.get_text("/menu/perf_stats")))
             .shortcut_text(cfg.shortcut(Menu::PerfStats));
         let res = ui
             .add(toggle)
-            .on_hover_text(self.get_text("/menu/debug/perf_stats_tooltip"));
+            .on_hover_text(self.localized_texts.get_text("/menu/debug/perf_stats_tooltip"));
         if res.clicked() {
             self.perf_stats_open = perf_stats_open;
             tx.event(EmulationEvent::ShowFrameStats(self.perf_stats_open));
@@ -1309,8 +1170,8 @@ impl Gui {
         }
 
         let mut gui_settings_open = self.gui_settings_open.load(Ordering::Acquire);
-        let toggle = ToggleValue::new(&mut gui_settings_open, format!("🔧 {}", self.get_text("/menu/ui_settings")));
-        let res = ui.add(toggle).on_hover_text(self.get_text("/menu/debug/ui_settings_tooltip"));
+        let toggle = ToggleValue::new(&mut gui_settings_open, format!("🔧 {}", self.localized_texts.get_text("/menu/ui_settings")));
+        let res = ui.add(toggle).on_hover_text(self.localized_texts.get_text("/menu/debug/ui_settings_tooltip"));
         if res.clicked() {
             self.gui_settings_open
                 .store(gui_settings_open, Ordering::Release);
@@ -1320,19 +1181,19 @@ impl Gui {
         #[cfg(debug_assertions)]
         {
             let mut gui_inspection_open = self.gui_inspection_open.load(Ordering::Acquire);
-            let toggle = ToggleValue::new(&mut gui_inspection_open, format!("🔍 {}", self.get_text("/menu/ui_inspection")));
+            let toggle = ToggleValue::new(&mut gui_inspection_open, format!("🔍 {}", self.localized_texts.get_text("/menu/ui_inspection")));
             let res = ui
                 .add(toggle)
-                .on_hover_text(self.get_text("/menu/debug_build_tooltip"));
+                .on_hover_text(self.localized_texts.get_text("/menu/debug_build_tooltip"));
             if res.clicked() {
                 self.gui_inspection_open
                     .store(gui_inspection_open, Ordering::Release);
                 ui.close_menu();
-            }
+            }   
 
             let mut gui_memory_open = self.gui_memory_open.load(Ordering::Acquire);
-            let toggle = ToggleValue::new(&mut gui_memory_open, format!("📝 {}", self.get_text("/menu/ui_memory")));
-            let res = ui.add(toggle).on_hover_text(self.get_text("/menu/debug/ui_memory_tooltip"));
+            let toggle = ToggleValue::new(&mut gui_memory_open, format!("📝 {}", self.localized_texts.get_text("/menu/ui_memory")));
+            let res = ui.add(toggle).on_hover_text(self.localized_texts.get_text("/menu/debug/ui_memory_tooltip"));
             if res.clicked() {
                 self.gui_memory_open
                     .store(gui_memory_open, Ordering::Release);
@@ -1345,7 +1206,7 @@ impl Gui {
             }
 
             #[cfg(target_arch = "wasm32")]
-            if ui.button("❗Test panic!").clicked() {
+            if ui.button("❗Test panic!").clicked() {   
                 panic!("panic test");
             }
         }
@@ -1506,10 +1367,10 @@ impl Gui {
     
             let mut recording_labels = Vec::new();
             if self.replay_recording {
-                recording_labels.push(self.get_text("/menu/file/record_replay"));
+                recording_labels.push(self.localized_texts.get_text("/menu/file/record_replay"));
             }
             if self.audio_recording {
-                recording_labels.push(self.get_text("/menu/file/record_audio"));
+                recording_labels.push(self.localized_texts.get_text("/menu/file/record_audio"));
             }
             if !recording_labels.is_empty() {
                 Frame::side_top_panel(ui.style()).show(ui, |ui| {
@@ -1519,7 +1380,7 @@ impl Gui {
                         ui.label(
                                 RichText::new(format!(
                                     "{}",
-                                    self.get_text("/ui/recording").replace("{}", &recording_labels.join(" & "))
+                                    self.localized_texts.get_text("/ui/recording").replace("{}", &recording_labels.join(" & "))
                                 ))
                                 .italics(),
                             )
@@ -1538,7 +1399,7 @@ impl Gui {
                                     Color32::RED,
                                     format!(
                                         "{}",
-                                        self.get_text("/ui/invalid_cpu")
+                                        self.localized_texts.get_text("/ui/invalid_cpu")
                                             .replace("{0:02X}", &format!("{:02X}", instr.opcode()))
                                             .replace("{1:?}", &format!("{:?}", instr.op()))
                                             .replace("{2:?}", &format!("{:?}", instr.addr_mode()))
@@ -1547,22 +1408,22 @@ impl Gui {
                                 );
     
                                 ui.vertical(|ui| {
-                                    ui.label(self.get_text("/ui/recovery_options"));
+                                    ui.label(self.localized_texts.get_text("/ui/recovery_options"));
                                     ui.horizontal(|ui| {
-                                        if ui.button(self.get_text("/ui/reset")).clicked() {
+                                        if ui.button(self.localized_texts.get_text("/ui/reset")).clicked() {
                                             self.tx.event(EmulationEvent::Reset(ResetKind::Soft));
                                             self.corrupted_cpu_instr = None;
                                         }
-                                        if ui.button(self.get_text("/ui/power_cycle")).clicked() {
+                                        if ui.button(self.localized_texts.get_text("/ui/power_cycle")).clicked() {
                                             self.tx.event(EmulationEvent::Reset(ResetKind::Hard));
                                             self.corrupted_cpu_instr = None;
                                         }
                                     });
                                     ui.horizontal(|ui| {
-                                        if ui.button(self.get_text("/ui/clear_save_states")).clicked() {
+                                        if ui.button(self.localized_texts.get_text("/ui/clear_save_states")).clicked() {
                                             preferences::State::clear_save_states(&self.tx);
                                         }
-                                        if ui.button(self.get_text("/ui/load_rom")).clicked() {
+                                        if ui.button(self.localized_texts.get_text("/ui/load_rom")).clicked() {
                                             self.tx.event(UiEvent::LoadRomDialog);
                                         }
                                     });
@@ -1641,7 +1502,7 @@ impl Gui {
             ui.end_row();
 
             let fps_min = self.frame_stats.fps_min;
-            ui.strong(format!("{} (min):", self.get_text("/menu/window/fps")));
+            ui.strong(format!("{} (min):", self.localized_texts.get_text("/menu/window/fps")));
             if fps_min.is_finite() {
                 ui.colored_label(fps_color(fps_min), format!("{fps_min:.2}"));
             } else {
@@ -1650,7 +1511,7 @@ impl Gui {
             ui.end_row();
 
             let frame_time = self.frame_stats.frame_time;
-            ui.strong(format!("{}:", self.get_text("/menu/window/frame_time")));
+            ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/frame_time")));
             if frame_time.is_finite() {
                 ui.colored_label(frame_time_color(frame_time), format!("{frame_time:.2} ms"));
             } else {
@@ -1659,7 +1520,7 @@ impl Gui {
             ui.end_row();
 
             let frame_time_max = self.frame_stats.frame_time_max;
-            ui.strong(format!("{} (max):", self.get_text("/menu/window/frame_time")));
+            ui.strong(format!("{} (max):", self.localized_texts.get_text("/menu/window/frame_time")));
             if frame_time_max.is_finite() {
                 ui.colored_label(
                     frame_time_color(frame_time_max),
@@ -1670,7 +1531,7 @@ impl Gui {
             }
             ui.end_row();
 
-            ui.strong(format!("{}:", self.get_text("/menu/window/frame_count")));
+            ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/frame_count")));
             ui.label(format!("{}", self.frame_stats.frame_count));
             ui.end_row();
 
@@ -1687,19 +1548,19 @@ impl Gui {
                 ui.label("");
                 ui.end_row();
 
-                ui.strong(format!("{}:", self.get_text("/menu/window/cpu")));
+                ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/cpu")));
                 ui.colored_label(
                     cpu_color(stats.cpu_usage),
                     format!("{:.2}%", stats.cpu_usage),
                 );
                 ui.end_row();
 
-                ui.strong(format!("{}:", self.get_text("/menu/window/memory")));
+                ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/memory")));
                 ui.label(format!("{} MB", bytes_to_mb(stats.memory)));
                 ui.end_row();
 
                 let du = stats.disk_usage;
-                ui.strong(format!("{}:", self.get_text("/menu/window/disk_read")));
+                ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/disk_read")));
                 ui.label(format!(
                     "{:.2}/{:.2} MB",
                     bytes_to_mb(du.read_bytes),
@@ -1707,7 +1568,7 @@ impl Gui {
                 ));
                 ui.end_row();
 
-                ui.strong(format!("{}:", self.get_text("/menu/window/disk_written")));
+                ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/disk_written")));
                 ui.label(format!(
                     "{:.2}/{:.2} MB",
                     bytes_to_mb(du.written_bytes),
@@ -1719,7 +1580,7 @@ impl Gui {
             ui.label("");
             ui.end_row();
 
-            ui.strong(format!("{}:", self.get_text("/menu/window/run_time")));
+            ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/run_time")));
             ui.label(format!("{} s", self.start.elapsed().as_secs()));
             ui.end_row();
 
@@ -1734,12 +1595,12 @@ impl Gui {
                 None => ("(-, -)".to_string(), "(-, -)".to_string()),
             };
 
-            ui.strong(format!("{}:", self.get_text("/menu/window/cursor_pos")));
+            ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/cursor_pos")));
             ui.label(cursor_pos);
             ui.end_row();
 
             if cfg.deck.zapper {
-                ui.strong(format!("{}:", self.get_text("/menu/window/zapper_pos")));
+                ui.strong(format!("{}:", self.localized_texts.get_text("/menu/window/zapper_pos")));
                 ui.label(zapper_pos);
                 ui.end_row();
             }
@@ -1750,12 +1611,12 @@ impl Gui {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
 
-        if self.version.requires_updates() && ui.button(format!("🌐 {}", self.get_text("/menu/update/check"))).clicked() {
+        if self.version.requires_updates() && ui.button(format!("🌐 {}", self.localized_texts.get_text("/menu/update/check"))).clicked() {
             let notify_latest = true;
             self.version.check_for_updates(&self.tx, notify_latest);
             ui.close_menu();
         }
-        let about_text = self.get_text("/menu/about_text");
+        let about_text = self.localized_texts.get_text("/menu/about_text");
         ui.toggle_value(&mut self.about_open, format!("ℹ {}", about_text));
     }
 
@@ -1836,9 +1697,9 @@ impl Gui {
         for (ty, message, _) in self.messages.iter().take(Self::MAX_MESSAGES) {
             let visuals = &ui.style().visuals;
             let (icon, color) = match ty {
-                MessageType::Info => (self.get_text("/menu/message/info_icon"), visuals.widgets.noninteractive.fg_stroke.color),
-                MessageType::Warn => (self.get_text("/menu/message/warn_icon"), visuals.warn_fg_color),
-                MessageType::Error => (self.get_text("/menu/message/error_icon"), visuals.error_fg_color),
+                MessageType::Info => (self.localized_texts.get_text("/menu/message/info_icon"), visuals.widgets.noninteractive.fg_stroke.color),
+                MessageType::Warn => (self.localized_texts.get_text("/menu/message/warn_icon"), visuals.warn_fg_color),
+                MessageType::Error => (self.localized_texts.get_text("/menu/message/error_icon"), visuals.error_fg_color),
             };
             ui.colored_label(color, format!("{icon} {message}"));
         }
@@ -1851,7 +1712,7 @@ impl Gui {
             ui.horizontal(|ui| {
                 let res = ui.colored_label(Color32::RED, error);
                 ui.add_space(available_width - res.rect.width() - 30.0);
-                if ui.button(self.get_text("/menu/message/error_icon")).clicked() {
+                if ui.button(self.localized_texts.get_text("/menu/message/error_icon")).clicked() {
                     self.error = None;
                 }
             });
@@ -1996,29 +1857,3 @@ impl Gui {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_translations() {
-        let mut localization = Localization::new();
-        
-        // 测试英文翻译
-        localization.set_language(Language::English);
-        assert_eq!(localization.get_text("/ui/quit"), "Quit");
-        assert_eq!(localization.get_text("/menu/about_text"), "About");
-        println!("English translation: {}", localization.get_text("/ui/quit"));
-        println!("English translation: {}", localization.get_text("/menu/about_text"));
-        
-        // 测试中文翻译
-        localization.set_language(Language::Chinese);
-        assert_eq!(localization.get_text("/ui/quit"), "退出");
-        assert_eq!(localization.get_text("/menu/about_text"), "关于");
-        println!("Chinese translation: {}", localization.get_text("/ui/quit"));
-        println!("Chinese translation: {}", localization.get_text("/menu/about_text"));
-        
-        // 测试不存在的路径
-        // assert_eq!(localization.get_text("/nonexistent/path"), "/nonexistent/path");
-    }
-}

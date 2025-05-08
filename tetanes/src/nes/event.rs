@@ -7,7 +7,8 @@ use crate::{
         emulation::FrameStats,
         input::{ActionBindings, AxisDirection, Gamepads, Input, InputBindings},
         renderer::{
-            gui::{Menu, MessageType, Language},
+            gui::{Menu, MessageType},
+            gui::localization::{Language, LOCALIZATION},
             shader::Shader,
         },
         rom::RomData,
@@ -31,7 +32,7 @@ use tetanes_core::{
     time::{Duration, Instant},
     video::VideoFilter,
 };
-use tracing::{debug, error, trace, warn, info};
+use tracing::{debug, error, trace, warn};
 use uuid::Uuid;
 use winit::{
     application::ApplicationHandler,
@@ -41,7 +42,6 @@ use winit::{
     window::WindowId,
 };
 
-use super::renderer::gui::LOCALIZATION;
 
 #[derive(Default, Debug, Copy, Clone)]
 #[must_use]
@@ -526,9 +526,7 @@ impl ApplicationHandler<NesEvent> for Running {
                     }
                     ConfigEvent::HideOverscan(hide) => renderer.hide_overscan = *hide,
                     ConfigEvent::Language(lang) => {
-                        info!("Received language change event: {:?}", lang);
                         LOCALIZATION.write().unwrap().set_language(*lang);
-                        info!("Language changed to: {:?}", lang);
                     },
                     ConfigEvent::MapperRevisions(revs) => deck.mapper_revisions = *revs,
                     ConfigEvent::RamState(ram_state) => deck.ram_state = *ram_state,
