@@ -195,7 +195,7 @@ impl AsRef<str> for Action {
                 Ui::LoadReplay => localization.get_text("/ui/load_replay"),
             },
             Action::Menu(menu) => match menu {
-                Menu::About => localization.get_text("/menu/about"),
+                Menu::About => localization.get_text("/menu/about_text"),
                 Menu::Keybinds => localization.get_text("/menu/keybinds"),
                 Menu::PerfStats => localization.get_text("/menu/perf_stats"),
                 Menu::PpuViewer => localization.get_text("/menu/ppu_viewer"),

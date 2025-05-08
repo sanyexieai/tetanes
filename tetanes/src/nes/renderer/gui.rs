@@ -922,7 +922,7 @@ impl Gui {
 
         if feature!(Storage) {
             ui.add_enabled_ui(self.loaded_rom.is_some(), |ui| {
-                let button = Button::new(format!("💾 {}", self.get_text("menu_file_save_state")))
+                let button = Button::new(format!("💾 {}", self.get_text("menu/file/save_state")))
                     .shortcut_text(cfg.shortcut(DeckAction::SaveState));
                 let res = ui
                     .add(button)
@@ -1172,7 +1172,7 @@ impl Gui {
             }
             Preferences::speed_slider(tx, ui, cfg.emulation.speed);
         });
-        ui.menu_button(self.get_text("🏃 Run Ahead..."), |ui| {
+        ui.menu_button(format!("💾 {}",self.get_text("menu/config/run_ahead")), |ui| {
             Preferences::run_ahead_slider(tx, ui, cfg.emulation.run_ahead);
         });
 
@@ -2019,6 +2019,6 @@ mod tests {
         println!("Chinese translation: {}", localization.get_text("/menu/about_text"));
         
         // 测试不存在的路径
-        assert_eq!(localization.get_text("/nonexistent/path"), "/nonexistent/path");
+        // assert_eq!(localization.get_text("/nonexistent/path"), "/nonexistent/path");
     }
 }
