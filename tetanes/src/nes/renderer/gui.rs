@@ -444,7 +444,7 @@ impl Gui {
         puffin::profile_function!();
 
         let mut about_open = self.about_open;
-        egui::Window::new(LOCALIZATION.read().unwrap().get_text("menu_about"))
+        egui::Window::new(LOCALIZATION.read().unwrap().get_text("menu/about_text"))
             .open(&mut about_open)
             .show(ctx, |ui| self.about(ui, enabled));
         self.about_open = about_open;
@@ -504,7 +504,7 @@ impl Gui {
         puffin::profile_function!();
 
         let mut perf_stats_open = self.perf_stats_open;
-        egui::Window::new(LOCALIZATION.read().unwrap().get_text("performance_stats"))
+        egui::Window::new(LOCALIZATION.read().unwrap().get_text("ui/performance_stats"))
             .open(&mut perf_stats_open)
             .show(ctx, |ui| {
                 ui.add_enabled_ui(enabled, |ui| self.performance_stats(ui, cfg));
