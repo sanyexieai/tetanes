@@ -90,17 +90,16 @@ impl Localization {
     }
 
     pub fn get_text(&self, path: &str) -> String {
-        // 首先尝试从缓存中读取
-        {
-            if let Ok(localized_texts) = LOCALIZATIONTEXTS.read() {
-                if let Some(text) = localized_texts.get_text(path) {
-                    return text;
-                }
+        let path = path.trim_start_matches('/');
+        
+        // 快速路径：尝试从缓存中读取
+        if let Ok(localized_texts) = LOCALIZATIONTEXTS.try_read() {
+            if let Some(text) = localized_texts.get_text(path) {
+                return text;
             }
         }
 
         // 如果缓存中没有，则从翻译文件中读取
-        let path = path.trim_start_matches('/');
         let parts: Vec<&str> = path.split('/').collect();
                 
         let translation = match self.translations.get(&self.current_language) {
@@ -127,8 +126,8 @@ impl Localization {
             path.to_string()
         });
 
-        // 更新缓存
-        if let Ok(mut localized_texts) = LOCALIZATIONTEXTS.write() {
+        // 尝试更新缓存，但不阻塞
+        if let Ok(mut localized_texts) = LOCALIZATIONTEXTS.try_write() {
             localized_texts.insert(path, result.clone());
         }
 
