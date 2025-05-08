@@ -27,25 +27,27 @@ impl LocalizedTexts {
             texts: HashMap::new(),
         }
     }
-    
 
-    pub fn get_text(&mut self, key: &str) -> String {
-        if let Some(text) = self.texts.get(key) {
-            return text.clone();
-        }
-        
-        let text = {
-            let localization = LOCALIZATION.read().unwrap();
-            localization.get_text(key)
+    pub fn get_text(&self, key: &str) -> Option<String> {
+        let text = match self.texts.get(key) {
+            Some(text) => Some(text.clone()),
+            None => None
         };
-        
-        self.texts.insert(key.to_string(), text.clone());
         text
     }
+    
+    pub fn insert(&mut self, key: &str, text: String) {
+        self.texts.insert(key.to_string(), text);
+    }
+
     pub fn clear(&mut self) {
         self.texts.clear();
     }
 }
+lazy_static::lazy_static! {
+    pub static ref LOCALIZATIONTEXTS: RwLock<LocalizedTexts> = RwLock::new(LocalizedTexts::new());
+}
+
 
 pub struct Localization {
     translations: HashMap<Language, Value>,
@@ -88,34 +90,44 @@ impl Localization {
     }
 
     pub fn get_text(&self, path: &str) -> String {
-        let path = path.trim_start_matches('/');
-        let parts: Vec<&str> = path.split('/').collect();
-                
-        let translation = match self.translations.get(&self.current_language) {
-            Some(t) => t,
+        let localized_texts = LOCALIZATIONTEXTS.read().unwrap();
+        let text = match localized_texts.get_text(path) {
+            Some(text) => text,
             None => {
-                warn!("No translation found for language: {:?}", self.current_language);
-                return path.to_string();
+                let path = path.trim_start_matches('/');
+                let parts: Vec<&str> = path.split('/').collect();
+                        
+                let translation = match self.translations.get(&self.current_language) {
+                    Some(t) => t,
+                    None => {
+                        warn!("No translation found for language: {:?}", self.current_language);
+                        return path.to_string();
+                    }
+                };
+                
+                let mut current = translation;
+                for part in parts {
+                    match current.get(part) {
+                        Some(next) => current = next,
+                        None => {
+                            warn!("No translation found for path: {}", path);
+                            return path.to_string();
+                        }
+                    }
+                }
+                
+                let result = current.as_str().map(String::from).unwrap_or_else(|| {
+                    warn!("Invalid translation value for path: {}", path);
+                    path.to_string()
+                });
+                let mut localized_texts = LOCALIZATIONTEXTS.write().unwrap();
+                localized_texts.insert(path.to_string().as_str(), result.clone());
+                result
             }
         };
-        
-        let mut current = translation;
-        for part in parts {
-            match current.get(part) {
-                Some(next) => current = next,
-                None => {
-                    warn!("No translation found for path: {}", path);
-                    return path.to_string();
-                }
-            }
-        }
-        
-        let result = current.as_str().map(String::from).unwrap_or_else(|| {
-            warn!("Invalid translation value for path: {}", path);
-            path.to_string()
-        });
-        result
+        text
     }
+    
 }
 
 lazy_static::lazy_static! {
