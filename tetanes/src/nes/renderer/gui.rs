@@ -656,11 +656,11 @@ impl Gui {
                     if cfg!(debug_assertions) {
                         ui.separator();
                         ui.label(
-                            RichText::new(format!("⚠ {} ⚠", LOCALIZATION.read().unwrap().get_text("debug_build")))
+                            RichText::new(format!("⚠ {} ⚠", LOCALIZATION.read().unwrap().get_text("menu/debug_build")))
                                 .small()
                                 .color(ui.visuals().warn_fg_color),
                         )
-                        .on_hover_text(LOCALIZATION.read().unwrap().get_text("debug_build_tooltip"));
+                        .on_hover_text(LOCALIZATION.read().unwrap().get_text("menu/debug_build_tooltip"));
                     }
                 });
             });
