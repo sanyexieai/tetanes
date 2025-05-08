@@ -701,7 +701,7 @@ impl Gui {
         #[cfg(feature = "profiling")]
         puffin::profile_function!();
 
-        let button = Button::new(format!("📂 {}", self.localized_texts.get_text("menu_file")))
+        let button = Button::new(format!("📂 {}", self.localized_texts.get_text("menu/file_text")))
             .shortcut_text(cfg.shortcut(UiAction::LoadRom));
         if ui.add(button).clicked() {
             if self.loaded_rom.is_some() {
